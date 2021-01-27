@@ -1,12 +1,14 @@
 # golang
 
-### 1.
+### 1. Installation
 
 ```go
-
+# https://studygolang.com/dl
+# 国内镜像: go env -w GOPROXY=https://goproxy.cn,direct
+# go env -w GO111MODULE=on
 ```
 
-### 2.
+### 2. 
 
 ```go
 
