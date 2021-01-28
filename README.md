@@ -150,33 +150,223 @@ func grade(score int) string {
 
 ```
 
-### 6.
+### 6. for 循环
+
+```go
+sum := 0
+	for i := 1;i <= 100;i++ {
+		sum += i
+	}
+	return sum
+
+// for的条件不需要括号
+// for的条件可以沈略出初始条件,结束条件,递增表达式
+
+func convertToBin(n int) string{
+	result := ""
+	for ; n > 0;n /= 2 {
+		lsb := n % 2
+		result = strconv.Itoa(lsb) + result
+	}
+	return result
+}
+```
+
+### 7. 函数
+
+```go
+func div(a, b int) (q, r int){
+    q = a / b
+    r = a % b
+    return
+	//return a / b ,a % b
+}
+//函数返回多个值可以起别名
+
+func apply(op func(int,int) int ,a,b int) int{
+	fmt.Println("calling %s with args %d,%d\n",
+		runtime.FuncForPC(reflect.ValueOf(op).Pointer()).Name(),
+		a,b)
+	return op(a,b)
+}
+
+// 可变参数
+func sum(numbers ...int) int {
+	s := 0
+	for i := range numbers {
+		s += numbers[i]
+	}
+	return s
+}
+```
+
+### 8. 指针
+
+```go
+var a int = 2
+var pa *int = &a
+*pa = 5
+fmt.Println(a)
+// 指针不能参与运算
+// 参数传递是值传递的方式
+
+```
+
+### 9. 数组
+
+```go
+// 数组是值类型数据
+var arr [5]int
+arr2 := [3]int{1,3,5}
+arr3 := [...]int{2,4,6,8,10}
+var grid [4][5]int
+
+//遍历数组
+for i := range arr3 {
+		fmt.Println(arr3[i])
+	}
+
+for i,v := range arr3 {
+		fmt.Println(i,v)
+	}
+
+for _,v := range arr3 {
+		fmt.Println(v)
+	}
+//for i := 0;i < len(arr3);i++ {
+//	fmt.Println(arr3[i])
+//}
+
+// [10]int 与 [20]int 是不同类型
+// 调用func f(arr [10]int) 会拷贝数组
+```
+
+### 10. 切片 Slice
+
+```go
+arr := [...]int{0,1,2,3,4,5,6,7}
+s := arr[2:6] //[2 3 4 5]  包前不包后
+// slice本身没有数据,是对数组array的一种视图view
+
+arr1 := [...]int{0,1,2,3,4,5,6,7}
+s4 := arr1[2:6] //[2 3 4 5]
+s5 := s1[3:5] // [5 6]
+// slice可以向后扩展,不可以向前扩展
+// s[i]不可以超越len(s),先后扩展不可以超越底层数据cap(s)
+```
+
+### 11.
 
 ```go
 
 ```
 
-### 7.
+### 12.
 
 ```go
 
 ```
 
-### 8.
+### 13.
 
 ```go
 
 ```
 
-### 9.
+### 14.
 
 ```go
 
 ```
 
-### 10.
+### 15.
 
 ```go
 
 ```
 
+### 16.
+
+```go
+
+```
+
+### 17.
+
+```go
+
+```
+
+### 18.
+
+```go
+
+```
+
+### 19.
+
+```go
+
+```
+
+### 20.
+
+```go
+
+```
+
+### 21.
+
+```go
+
+```
+
+### 22.
+
+```go
+
+```
+
+### 23.
+
+```go
+
+```
+
+### 24.
+
+```go
+
+```
+
+### 25.
+
+```go
+
+```
+
+### 26.
+
+```go
+
+```
+
+### 27.
+
+```go
+
+```
+
+### 28.
+
+```go
+
+```
+
+### 19.
+
+```go
+
+```
+
+### 20.

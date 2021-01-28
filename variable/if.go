@@ -38,6 +38,12 @@ func grade(score int) string {
 	return  g
 }
 
+func forever (){
+	for {
+		fmt.Println("abc")
+	}
+}
+
 func main() {
 	const filename  = "abc.txt"
 	if contents,err := ioutil.ReadFile(filename); err != nil {
@@ -62,5 +68,6 @@ func main() {
 		grade(100),
 		//grade(101),
 		)
+	forever()
 
 }
