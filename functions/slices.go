@@ -25,8 +25,17 @@ func main() {
 	fmt.Println(arr1)
 	s4 := arr1[2:6]
 	s5 := s1[3:5]
+	s6 := append(s5,10)
+	s7 := append(s6,11)
+	s8 := append(s7,12)
 	fmt.Println(s4)
 	fmt.Println(s5)
+	fmt.Println(s6)
+	fmt.Println(s7)
+	fmt.Println(s8)
+	fmt.Println(arr)
+
+
 
 
 }

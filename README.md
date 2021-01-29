@@ -244,33 +244,141 @@ for _,v := range arr3 {
 ### 10. 切片 Slice
 
 ```go
+var s []int // Zero value for slice is nil
+s2 := make([]int,16)
+s3 := make([]int,16,32)
+
 arr := [...]int{0,1,2,3,4,5,6,7}
 s := arr[2:6] //[2 3 4 5]  包前不包后
 // slice本身没有数据,是对数组array的一种视图view
 
 arr1 := [...]int{0,1,2,3,4,5,6,7}
-s4 := arr1[2:6] //[2 3 4 5]
-s5 := s1[3:5] // [5 6]
+s1 := arr1[2:6] //[2 3 4 5]
+s2 := s1[3:5] // [5 6]
 // slice可以向后扩展,不可以向前扩展
 // s[i]不可以超越len(s),先后扩展不可以超越底层数据cap(s)
-```
+s3 := append(s2,10)
+s4 := append(s3,11)
+s5 := append(s4,12)
+// 添加元素时如果超越cap,系统会重新分配更大的底层数组
+// 由于值传递的关系,必须接受append的返回值
+s = append(s,val)
 
-### 11.
-
-```go
-
-```
-
-### 12.
-
-```go
 
 ```
 
-### 13.
+### 11.  Map 
 
 ```go
+m := map[string]string {
+    "name": "assasin",
+    "site": "github.com",
+    "age":"25",
+    "quality": "good",
+}
+// 遍历map: k在map中时无序的
+for k,v := range m {
+		fmt.Println(k,v)
+	}
 
+// map[k]V,map[K1]map[K2]V
+
+m2 := make(map[string]int)
+var m3 map[string]int
+
+
+name := m["name"]
+// 当获取不存在的key时返回空字符串
+// 用value,ok := m[key] 判断是否存在key
+if name,ok := m["nawme"]; ok {
+		fmt.Println(name)
+}else{
+    fmt.Println("key is not exits")
+}
+
+delete(m,"name")
+name,ok := m["name"]
+
+// map的key
+// map使用哈希表,必须可以比较相等
+// 除了slice,map,function的内建类型都可以作为key
+// struct类型不包含上述字段,也可以作为key
+```
+
+```go
+// map示例: 寻找最长不含有重复字符的字串 
+abcabcbb -> abc
+bbbbbb -> b
+pwwkew -> wke
+
+// 对于每一个字母x
+// (1) lastOccurred[x]不存在,或者 < start  -> 无需操作
+// (2) lastOccurred[x] >= start -> 更新start
+// (3) 更新lastOccurred[x],更新maxLength
+
+func lengthOfNoRepeatStr(s string) int {
+	lastOccurred := make(map[byte]int)
+	start := 0
+	maxLength := 0
+	for i, ch := range []byte(s) {
+		if lastI, ok := lastOccurred[ch]; ok && lastI  >= start {
+			start = lastI + 1
+		}
+
+		if lastOccurred[ch] >= start {
+			start = lastOccurred[ch] + 1
+		}
+
+		if i - start + 1 > maxLength {
+			maxLength = i - start + 1
+		}
+		lastOccurred[ch] = i
+	}
+	return  maxLength
+}
+```
+
+### 12. Rune
+
+```go
+//rune相当于go的char
+// 使用range遍历pos,rune对
+//使用utf8.RuneCountInString获得字符数量
+//使用len获取字节长度
+//使用[]byte获取字节
+
+func lengthOfNoRepeatStr(s string) int {
+	lastOccurred := make(map[rune]int)
+	start := 0
+	maxLength := 0
+	for i, ch := range []rune(s) {
+		if lastI, ok := lastOccurred[ch]; ok && lastI  >= start {
+			start = lastI + 1
+		}
+
+		if lastOccurred[ch] >= start {
+			start = lastOccurred[ch] + 1
+		}
+
+		if i - start + 1 > maxLength {
+			maxLength = i - start + 1
+		}
+		lastOccurred[ch] = i
+	}
+	return  maxLength
+}
+
+
+```
+
+### 13. 结构体与方法
+
+```go
+// go语言仅支持封装,不支持继承与多态,没有class,只有struct
+type treeNode struct {
+    Left,Right,*TreeNode
+    Value int
+}
 ```
 
 ### 14.
