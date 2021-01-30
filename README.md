@@ -9,9 +9,20 @@
 // go get -v golang.org/x/tools/cmd/goimports
 ```
 
-### 2. 变量
+```json
+# 数据类型:
+# 基本数据类型:bool,string,int
+# 符合数据类型:array,slice,map,struct,指针,interface,func......
+```
+
+### 2. 变量与常量
 
 ```go
+// 声明: 
+var name type   
+name = value
+// 变量: 本质是一小块内存,用于存储某个数值,该数值可以在程序的运行过程中可以被改变
+// 常量: 通变量类似,程序执行过程中,数值不可以改变
 var a,b,c bool
 var s1,s2 string = "hello","assasin"
 var a,b,i,s1,s2 = true,false,3,"hello","assasin"
@@ -379,15 +390,45 @@ type treeNode struct {
     Left,Right,*TreeNode
     Value int
 }
+
+func createNode(value int) *treeNode {
+	return &treeNode{value: value}
+}
+root.left.right = createNode(10)
+// 使用自定义工厂函数,返回了局部变量的地址
+
+func (node treeNode) print() {
+	fmt.Println(node.value)
+}
+// 显示定义和命名方法接受者
+
+func (node *treeNode) setvalue(value int) {
+	node.value = value
+}
+// 只有使用指针草可以改变结构体内容
+// nil指针也可以调用方法
+
+// 值接收者 指针接收者
+// 要改变内容必须使用指针接收者
+// 结构过大也可以考虑使用指针接收者
+// 一致性:如有指针接收者,最好都是指针接收者
+// 值接收者是go的特性
+// 值/指针接收者均可接收值/指针
 ```
 
-### 14.
+### 14. 封装与包
 
 ```go
+// 名字一般使用CamelCase 大驼峰
+// 首字母大写: public
+// 首字母小写: private
+
+// 每个目录就是一个包,main包包含可执行入口
+// 为结构定的方法必须放在同一个包内,可以是不同的文件
 
 ```
 
-### 15.
+### 15. 依赖管理
 
 ```go
 
