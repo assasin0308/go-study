@@ -430,14 +430,19 @@ func (node *treeNode) setvalue(value int) {
 
 ### 15. 依赖管理
 
-```go
+```shell
+go mod init
+go build ./...
+go install ./...
 
+
+go get -u go.uber.org/zap
 ```
 
-### 16.
+### 16. 接口
 
 ```go
-
+// 
 ```
 
 ### 17.
