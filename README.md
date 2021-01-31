@@ -102,6 +102,17 @@ func enums(){
 ### 5. 流程控制
 
 ```go
+if 条件1 {
+    // TODO 1
+} else if 条件2 {
+    //TODO 2
+}
+// 或
+if a := 5;a > 2 {
+    //TODO
+    // 这里的a只是局部变量,外部不可使用
+}
+
 func main() {
 	const filename  = "abc.txt"
 	if contents,err := ioutil.ReadFile(filename); err != nil {
@@ -139,6 +150,7 @@ func eval(a,b int,op string) int {
 
 // switch 会自动break,除非使用fallthrough 
 // switch 可以没有表达式
+// case与switch的数值类型必须一致
 
 func grade(score int) string {
 	g := ""
@@ -147,6 +159,7 @@ func grade(score int) string {
 		panic(fmt.Sprintf("Wrong Score: %d",score))
 	case score < 60:
 		g = "F"
+        fallthrough
 	case score < 80:
 		g = "C"
 	case score < 90:
@@ -158,6 +171,8 @@ func grade(score int) string {
 }
 
 
+// break: 强制结束case执行
+// fallthrough: 穿透case执行
 
 ```
 
