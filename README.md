@@ -11,8 +11,11 @@
 
 ```json
 # 数据类型:
-# 基本数据类型:bool,string,int
-# 符合数据类型:array,slice,map,struct,指针,interface,func......
+# 基本数据类型: bool,string,int,float
+# 符合数据类型: array,slice,map,struct,pointer,interface,function......
+
+# 值类型数据: bool,string,int,float,array
+# 引用类型数据: 
 ```
 
 ### 2. 变量与常量
@@ -196,6 +199,24 @@ func convertToBin(n int) string{
 	}
 	return result
 }
+
+
+// 获取时间戳
+timestamp := time.Now().Unix() // 秒
+timestamp_na := time.Now().UnixNano() // 纳秒
+
+// 获取[m,n]随机数: rand.Intn(n-m+1)+m 
+// break & continue 
+count := 0
+	for a := 1;a <= 100;a++ {
+		if a % 3 == 0 && a % 5 != 0 {
+			fmt.Println(a)
+			count ++
+			if count == 5 {
+				break
+			}
+		}
+	}
 ```
 
 ### 7. 函数
@@ -241,7 +262,9 @@ fmt.Println(a)
 ### 9. 数组
 
 ```go
-// 数组是值类型数据
+// 数组是值类型数据,一旦创建,大小不能改变
+// var array_name [size] data_type
+// var balance [10] float32
 var arr [5]int
 arr2 := [3]int{1,3,5}
 arr3 := [...]int{2,4,6,8,10}
@@ -265,6 +288,23 @@ for _,v := range arr3 {
 
 // [10]int 与 [20]int 是不同类型
 // 调用func f(arr [10]int) 会拷贝数组
+// 由于数组是定长数据,len(arr) 长度 === cap(arr) 容量
+```
+
+```go
+// 冒泡排序: 比较相邻的两个数,小的靠前,大的靠后
+func paoSort(arr []int) []int {
+	nums := len(arr)
+	for i := 1;i < nums;i++ {
+		for j := 0;j < nums -i;j++ {
+			if arr[j] > arr[j+1] {
+				arr[j],arr[j+1] = arr[j+1],arr[j]
+			}
+		}
+		//fmt.Println("第",i,"轮排序",arr)
+	}
+	return arr
+}
 ```
 
 ### 10. 切片 Slice
