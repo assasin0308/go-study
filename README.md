@@ -15,7 +15,10 @@
 # 符合数据类型: array,slice,map,struct,pointer,interface,function......
 
 # 值类型数据: bool,string,int,float,array
-# 引用类型数据: 
+# 引用类型数据: slice,map
+
+# 浅拷贝: 拷贝的是数据地址,多个变量指向同一内存地址,引用类型的数据默认都是先拷贝: slice,map
+# 深拷贝: 拷贝的是数据本身,值类型的数据都是深拷贝: array,int,float,string,bool,struct
 ```
 
 ### 2. 变量与常量
@@ -219,7 +222,7 @@ count := 0
 	}
 ```
 
-### 7. 函数
+### 7. 函数 function
 
 ```go
 func div(a, b int) (q, r int){
@@ -247,7 +250,7 @@ func sum(numbers ...int) int {
 }
 ```
 
-### 8. 指针
+### 8. 指针 pointer
 
 ```go
 var a int = 2
@@ -259,7 +262,7 @@ fmt.Println(a)
 
 ```
 
-### 9. 数组
+### 9. 数组 array
 
 ```go
 // 数组是值类型数据,一旦创建,大小不能改变
@@ -310,8 +313,9 @@ func paoSort(arr []int) []int {
 ### 10. 切片 Slice
 
 ```go
+// 指向一个底层数组,有序,变长,元素可以重复
 var s []int // Zero value for slice is nil
-s2 := make([]int,16)
+s2 := make([]int,16) // 默认容量与长度一致
 s3 := make([]int,16,32)
 
 arr := [...]int{0,1,2,3,4,5,6,7}
@@ -319,7 +323,7 @@ s := arr[2:6] //[2 3 4 5]  包前不包后
 // slice本身没有数据,是对数组array的一种视图view
 
 arr1 := [...]int{0,1,2,3,4,5,6,7}
-s1 := arr1[2:6] //[2 3 4 5]
+s1 := arr1[2:6] //[2 3 4 5] [start,end)
 s2 := s1[3:5] // [5 6]
 // slice可以向后扩展,不可以向前扩展
 // s[i]不可以超越len(s),先后扩展不可以超越底层数据cap(s)
@@ -330,16 +334,24 @@ s5 := append(s4,12)
 // 由于值传递的关系,必须接受append的返回值
 s = append(s,val)
 
+// 从已有数组上创建切片,该切片的底层数组就是当前数组
+// 长度是从start到end切割的数据量,但是长度是从start到数组的末尾.
+// 当向切片中添加数据时,如果没有超过容量,直接添加,如果超过容量,自动扩容(成倍增长)
 
 ```
 
-### 11.  Map 
+### 11.  映射 Map 
 
 ```go
+// 存储的是无序的键值对;键与值一一对应(映射项);
+// var map3 map[int]string 如果不初始化map,那么就会创建一个nil map,nil map不能用来存放键值对 map3 == nil
+// 当key不存在时,会得到该value值类型的默认值,如string类型会得到空字符串,int类型会得到0,程序不会报错.
+// 可以使用 value,ok := map[key] 知道key/value是否存在, ok是bool值
+
 m := map[string]string {
     "name": "assasin",
     "site": "github.com",
-    "age":"25",
+    "age": "25",
     "quality": "good",
 }
 // 遍历map: k在map中时无序的
@@ -434,10 +446,9 @@ func lengthOfNoRepeatStr(s string) int {
 	return  maxLength
 }
 
-
 ```
 
-### 13. 结构体与方法
+### 13. 结构体与方法 struct
 
 ```go
 // go语言仅支持封装,不支持继承与多态,没有class,只有struct
@@ -500,82 +511,87 @@ go get -u go.uber.org/zap
 // 
 ```
 
-### 17.
+### 17. 
 
 ```go
 
 ```
 
-### 18.
+### 18. 
 
 ```go
 
 ```
 
-### 19.
+### 19. 
 
 ```go
 
 ```
 
-### 20.
+### 20. 
 
 ```go
 
 ```
 
-### 21.
+### 21. 
 
 ```go
 
 ```
 
-### 22.
+### 22. 
 
 ```go
 
 ```
 
-### 23.
+### 23. 
 
 ```go
 
 ```
 
-### 24.
+### 24. 
 
 ```go
 
 ```
 
-### 25.
+### 25. 
 
 ```go
 
 ```
 
-### 26.
+### 26. 
 
 ```go
 
 ```
 
-### 27.
+### 27. 
 
 ```go
 
 ```
 
-### 28.
+### 28. 
 
 ```go
 
 ```
 
-### 19.
+### 19. 
 
 ```go
 
 ```
 
-### 20.
+### 20. 
+
+```go
+
+```
+
