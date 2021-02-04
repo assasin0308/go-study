@@ -14,7 +14,7 @@
 # 基本数据类型: bool,string,int,float
 # 符合数据类型: array,slice,map,struct,pointer,interface,function......
 
-# 值类型数据: bool,string,int,float,array
+# 值类型数据: bool,string,int,float,array,struct
 # 引用类型数据: slice,map
 
 # 浅拷贝: 拷贝的是数据地址,多个变量指向同一内存地址,引用类型的数据默认都是先拷贝: slice,map
@@ -225,6 +225,15 @@ count := 0
 ### 7. 函数 function
 
 ```go
+// 函数: 就是执行特定任务的代码块,具有独立功能的代码块,可以多次调用
+func funcName(parameter type1,parameter type2) (outpot1 type1,output2 type2) {
+    // 这里是逻辑代码
+    // 返回多个值
+    return value1,value2
+}
+
+
+
 func div(a, b int) (q, r int){
     q = a / b
     r = a % b
@@ -248,6 +257,7 @@ func sum(numbers ...int) int {
 	}
 	return s
 }
+
 ```
 
 ### 8. 指针 pointer
@@ -343,7 +353,7 @@ s = append(s,val)
 ### 11.  映射 Map 
 
 ```go
-// 存储的是无序的键值对;键与值一一对应(映射项);
+// 存储的是无序的键值对;键与值一一对应(映射项);键不能重复,如果重复,新的value或覆盖原来的value值;
 // var map3 map[int]string 如果不初始化map,那么就会创建一个nil map,nil map不能用来存放键值对 map3 == nil
 // 当key不存在时,会得到该value值类型的默认值,如string类型会得到空字符串,int类型会得到0,程序不会报错.
 // 可以使用 value,ok := map[key] 知道key/value是否存在, ok是bool值
@@ -414,6 +424,33 @@ func lengthOfNoRepeatStr(s string) int {
 	}
 	return  maxLength
 }
+```
+
+```go
+// 切片中存放map
+map1 := make(map[string]string)
+    map1["name"] = "assasin"
+    map1["age"] = "29"
+    map1["sex"] = "male"
+    map1["address"] = "bj"
+    map2 := make(map[string]string)
+    map2["name"] = "王大狗"
+    map2["age"] = "30"
+    map2["sex"] = "female"
+    map2["address"] = "hz"
+    map3 := map[string]string{
+        "name" : "李大狗",
+        "age" : "45",
+        "sex":"male",
+        "address": "sz",
+    }
+    s1 := make([] map[string]string,0,3)
+    s1 = append(s1,map1)
+    s1 = append(s1,map2)
+    s1 = append(s1,map3)
+    for _,val := range s1 {
+        fmt.Println(val)
+    }
 ```
 
 ### 12. Rune
