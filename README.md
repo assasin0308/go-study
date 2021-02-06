@@ -232,8 +232,6 @@ func funcName(parameter type1,parameter type2) (outpot1 type1,output2 type2) {
     return value1,value2
 }
 
-
-
 func div(a, b int) (q, r int){
     q = a / b
     r = a % b
@@ -249,13 +247,33 @@ func apply(op func(int,int) int ,a,b int) int{
 	return op(a,b)
 }
 
-// 可变参数
-func sum(numbers ...int) int {
-	s := 0
-	for i := range numbers {
-		s += numbers[i]
+// 可变参数函数: 可变参数相当于切片;调用时可以传入0-多个该种类型的数值,或者是直接传入该种类型的切片...
+func getAdd(nums... int) int {
+    sum := 0
+    for _,v := range nums {
+        sum += v
+    }
+    return sum
+}
+fmt.Println(getAdd(1,2,3,4)) // 10 
+fmt.Println(getAdd([]int{1,2,3,4}...)) // 10 
+
+// 注意事项1: 如果一个函数的参数是可变参数同时还有其他参数,可变参数一般放在参数列表末尾
+func func2(name string,nums... int) {
+    //TODO
+}
+// 注意事项2: 一个函数的参数列表中最多只能有一个可变参数
+
+// 函数参数的传递:
+// 1. 值类型(基本数据类型,array)的数据,默认都是值传递
+// 2. 引用传递,传递的是数据的内存地址,导致多个变量指向同一块内存; slice,map
+
+// 递归函数:
+func getSum(n int) int {
+	if n == 1 {
+		return  1
 	}
-	return s
+	return getSum(n - 1) + n
 }
 
 ```
@@ -263,6 +281,7 @@ func sum(numbers ...int) int {
 ### 8. 指针 pointer
 
 ```go
+// 
 var a int = 2
 var pa *int = &a
 *pa = 5
