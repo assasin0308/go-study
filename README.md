@@ -276,7 +276,142 @@ func getSum(n int) int {
 	return getSum(n - 1) + n
 }
 
+
+// 匿名函数(通常只能使用一次):
+func (){
+    fmt.Println("这是一个匿名函数")
+}()
+
+// 带参数的匿名函数:
+func (a,b int) {
+    fmt.Println("a: ",a,"b: ",b)
+}(1,2)
+
+// 带返回值的匿名函数:
+result := func (a,b int) int {
+    return  a + b
+}(1,2)
+fmt.Println(result)
+
+// 用变量存储匿名函数: 
+res2 := func (){
+    fmt.Println("这也是一个匿名函数")
+}
+res2() // 调用
+
 ```
+
+```go
+// 回调函数:
+// 函数func1作为另一个函数func2的参数,函数func1就是回调函数,func2就是高阶函数
+
+func add(a,b int) int {
+	return a + b
+}
+
+
+func sub(a,b int) int {
+	if a < b {
+		return 0
+	}
+	return a - b
+}
+
+func div(a,b int) int {
+	if b == 0 || a < b {
+		return 0
+	}
+	return a / b
+}
+
+
+func oper(m,n int,func1 func(int,int) int) int {
+	res := func1(m,n)
+	return res
+}
+
+fmt.Printf("%T\n",add) // func(int, int) int
+fmt.Printf("%T\n",oper) // func(int, int, func(int, int) int) int
+res1 := add(1,2)
+fmt.Println(res1)
+res2 := oper(10,20,add)
+fmt.Println(res2)
+res3 := oper(15,3,div)
+fmt.Println(res3)
+res4 := oper(20,10,sub)
+fmt.Println(res4)
+// 匿名函数做回调函数
+res5 := oper(10,10,func(a,b int) int{
+    //fmt.Println("a:",a,"b:",b)
+    return a * b
+})
+fmt.Println(res5)
+```
+
+```go
+// 闭包函数(将函数作为另一个函数的返回值):
+func increment() func()int {
+	i := 0
+	fun := func() int{
+		// 内层函数,一般会操作外层函数的局部变量,并且外层函数的返回值就是该内层函数.
+		// 该内层函数和内层函数操作的局部变量,统称为闭包结构,closure
+        // 可以延长该外层函数的布局变量生命周期
+		i++
+		return i
+	}
+	return fun // 将内层函数返回,返回的是该内层函数的内存地址
+}
+
+res1 := increment()
+fmt.Printf("%T\n",res1)
+res2 := res1()
+fmt.Println(res2) // 1
+res3 := res1()
+fmt.Println(res3) // 2
+```
+
+```go
+// defer函数: 一个函数的执行被延迟
+// 多个defer遵循LIFO（后进先出）的顺序执行 哪怕函数或某个延迟调用发生错误，这些调用依旧会被执。
+// defer 调用函数是就已经传递参数了,只是暂不执行
+
+// 当外围函数中的语句正常执行完毕时,只有其中所有的延迟函数都执行完毕,外围函数才追真正的执行结束;
+// 当执行外围函数中的return语句是,只有其中所有的延迟函数都执行完毕后,外围函数才会真正返回;
+// 当外围函数中的代码引发恐慌时,只有其中所有的延迟函数都执行完毕后,该运行是恐慌才会真正被扩展至调用函数.
+
+
+
+func f1() (result int) {
+	defer func(){
+		result++
+	}()
+	return 0
+}
+
+func f2()(r int) {
+	t := 5
+	defer func(){
+		t = t + 5
+	}()
+	return t
+}
+
+func f3()(r int){
+	defer func(r int) {
+		r = r + 5
+	}(r)
+	return 1
+}
+
+res1 := f1()
+fmt.Println(res1) // 1
+res2 := f2()
+fmt.Println(res2) // 5
+res3 := f3()
+fmt.Println(res3) // 1
+```
+
+
 
 ### 8. 指针 pointer
 
