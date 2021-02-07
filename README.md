@@ -15,9 +15,9 @@
 # 符合数据类型: array,slice,map,struct,pointer,interface,function......
 
 # 值类型数据: bool,string,int,float,array,struct
-# 引用类型数据: slice,map
+# 引用类型数据: slice,map,
 
-# 浅拷贝: 拷贝的是数据地址,多个变量指向同一内存地址,引用类型的数据默认都是先拷贝: slice,map
+# 浅拷贝: 拷贝的是数据地址,多个变量指向同一内存地址,引用类型的数据默认都是浅拷贝: slice,map
 # 深拷贝: 拷贝的是数据本身,值类型的数据都是深拷贝: array,int,float,string,bool,struct
 ```
 
@@ -411,18 +411,24 @@ res3 := f3()
 fmt.Println(res3) // 1
 ```
 
-
-
 ### 8. 指针 pointer
 
 ```go
-// 
-var a int = 2
-var pa *int = &a
-*pa = 5
-fmt.Println(a)
+// 指针: 是存储另一个变量的内存地址的变量
 // 指针不能参与运算
 // 参数传递是值传递的方式
+
+a := 10
+fmt.Println("a:",a)
+fmt.Println("a的内存地址是:",&a) // a的内存地址是: 0xc00000a0a8
+
+var p1 *int
+fmt.Println(p1) // <nil> 空指针
+p1 = &a
+fmt.Println("p1的数值是:",p1) // p1的数值是: 0xc00000a0a8
+fmt.Println("p1的数值是变量的地址,该地址存储的数据是:",*p1) // p1的数值是变量的地址,改地址存储的数据是: 10
+fmt.Println(`p1自己的地址是:`,&p1) // p1自己的地址是: 0xc000006030
+
 
 ```
 
