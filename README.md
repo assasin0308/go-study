@@ -11,11 +11,12 @@
 
 ```json
 # 数据类型:
+
 # 基本数据类型: bool,string,int,float
-# 符合数据类型: array,slice,map,struct,pointer,interface,function......
+# 复合数据类型: array,slice,map,struct,pointer,interface,function......
 
 # 值类型数据: bool,string,int,float,array,struct
-# 引用类型数据: slice,map,
+# 引用类型数据: slice,map,function,pointer
 
 # 浅拷贝: 拷贝的是数据的内存地址,多个变量指向同一内存地址,引用类型的数据默认都是浅拷贝: slice,map,function,
 # 深拷贝: 拷贝的是数据本身(副本),对原始数据诶呦影响,值类型的数据都是深拷贝: array,int,float,string,bool,struct
@@ -758,6 +759,112 @@ func lengthOfNoRepeatStr(s string) int {
 ```
 
 ### 13. 结构体与方法 struct
+
+```go
+// 结构体: 值类型数据,默认深拷贝
+// 1. 定义一个结构体
+type Person struct {
+	name string
+	age int
+	sex string
+	address string
+
+}
+
+// 2. 创建一个结构体类型的变量对象
+var p1 Person
+p1.name = `assasin`
+p1.age = 29
+p1.sex = `男`
+p1.address = `天通苑东一区`
+fmt.Println(p1) // {assasin 29 男 天通苑东一区}
+// 方法二:
+p2 := Person{}
+fmt.Println(p2)
+p2.name = "tom"
+p2.age = 35
+p2.sex = "女"
+p2.address = "上海"
+fmt.Println(p2) // {tom 35 女 上海}
+// 方法三:
+p3 := Person{
+    name:"李晓华",
+    age:48,
+    sex:"男",
+    address:"南京",
+}
+fmt.Println(p3) //{李晓华 48 男 南京}
+// 方法四:
+p4 := Person{"李二牛",35,"女","贵州"} // 按照定义的顺序
+fmt.Println(p4) // {李二牛 35 女 贵州}
+// 方法五: 内置函数 new(),go语言中专门用于创建某种类型指针的函数
+p5 := new(Person)
+fmt.Printf("%T,%T,\n",p1,p5) // main.Person,*main.Person,
+//(*p5).namme = "jerry"
+p5.name = "jacson"
+p5.age = 58
+p5.sex = "男"
+p5.address = "江苏"
+fmt.Println(p5) // &{jacson 58 男 江苏}
+fmt.Printf("%p\n",p5) // 0xc00003a180
+```
+
+```go
+// 结构体作为参数:
+
+type Cat struct {
+	name string
+	age int
+}
+func changeName1(c Cat) { // c = c1 值传递,传递的是数据的副本
+	c.name = "花花"
+}
+func changeName2(c *Cat) { // c = &c1 引用传递,传递的是地址
+	c.name = "默默"
+}
+
+func  getCat1() Cat {
+	c := Cat{"露娜",2}
+	return c
+}
+
+func  getCat2() *Cat {
+	//c := new(Cat)
+	c := Cat{"加菲猫",3}
+	return &c
+}
+
+
+c1 := Cat{"tom",1}
+fmt.Println(c1) // {tom 1}
+changeName1(c1)
+fmt.Println(c1) // {tom 1}
+
+changeName2(&c1)
+fmt.Println(c1) // {默默 1}
+
+c2 := getCat1()
+c3 := getCat1()
+fmt.Println(c2,c3) // {露娜 2} {露娜 2}
+c2.name = "jerry"
+fmt.Println(c2,c3) // {jerry 2} {露娜 2}
+
+c4 := getCat2()
+c5 := getCat2()
+fmt.Println(*c4,*c5) // &{加菲猫 3} &{加菲猫 3}
+c4.name = "小花猫"
+fmt.Println(*c4,*c5) // &{小花猫 3} &{加菲猫 3}
+
+
+```
+
+```go
+// 匿名结构体,匿名字段
+
+
+```
+
+
 
 ```go
 // go语言仅支持封装,不支持继承与多态,没有class,只有struct
