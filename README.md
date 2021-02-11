@@ -859,8 +859,231 @@ fmt.Println(*c4,*c5) // &{小花猫 3} &{加菲猫 3}
 ```
 
 ```go
-// 匿名结构体,匿名字段
+// 匿名结构体:没有名字的结构体,往往同时创建该匿名结构体的对象
+p1 := struct {
+		name string
+		age int
+	}{
+		name: "张三",
+		age: 16,
+	}
+fmt.Println(p1.name,p1.age)
 
+// 匿名字段:一个结构体的字段没有名字,默认使用类型作为字段名.同一类型只能定义一次!
+type student struct {
+	string // 匿名字段
+	int // 匿名字段
+}
+
+s1 := student{"张三",18}
+fmt.Println(s1) // {张三 18}
+fmt.Println(s1.string,s1.int) // 张三 18
+
+```
+
+```go
+// 结构体的嵌套: 
+
+// 聚合关系: 一个类作为另一个类的属性 has a 
+type A struct{}
+type B struct{
+    a  A // 聚合关系
+}
+// 1. 定义一个书的结构体
+type Book struct {
+	bookname string
+	price float64
+	author string
+}
+// 2. 定义一个人的结构体
+type Person struct {
+	name string
+	age int
+	book Book // 聚合关系 -> has a 关系
+}
+
+b1 := Book{}
+b1.bookname = "金瓶梅里没有梅"
+b1.price = 45.8
+b1.author = "田中天"
+
+p1 := Person{}
+p1.name = "王二狗"
+p1.age = 29
+p1.book = b1 // 将结构体作为属性
+
+fmt.Printf("姓名:%s,年龄是:%s,书名:%s,价格:%.2f,作者:%s\n",
+           p1.name,p1.age,
+           p1.book.bookname,
+           p1.book.price,
+           p1.book.author,
+          )
+p1.book.bookname = "金瓶梅里没有梅2"
+fmt.Println(p1)
+fmt.Println(b1)
+
+p2 := Person{
+    name: "老王",
+    age:35,
+    book: Book{bookname:"金瓶梅里没有梅3", price:48.2, author:"assasin"},
+}
+fmt.Println(p2.name,p2.age)
+fmt.Println("\t",p2.book.bookname,p2.book.price,p2.book.author)
+
+p3 := Person{
+    name: "jeryy",
+    age: 45,
+    book: Book{
+        bookname: "go语言怎么炼成的",
+        price: 55.9,
+        author: "王建",
+    },
+}
+fmt.Println(p3.name,p3.age)
+fmt.Println("\t",p3.book.bookname,p3.book.price,p3.book.author)
+
+p4 := Person{"李小花",68,Book{"十万个为啥 ? ",45.2,"张晓春"}}
+fmt.Println(p4.name,p4.age)
+fmt.Println("\t",p4.book.bookname,p4.book.price,p4.book.author)
+
+
+// 实现一个学生对象有多本书(创建一个装书的容器):
+type Book struct {
+ 	bookname string
+ 	price float64
+ }
+
+type Student struct {
+	name string
+	age int
+	books  []*Book
+}
+
+// 1.创建多个书对象
+b1 := Book{"孙子兵法",120.8}
+b2 := Book{"天局",28.30}
+b3 := Book{"易经经",88.9}
+
+// 2.创建一个装书的容器 切片
+bookcase := make([]*Book,0,10)
+// 3.将书放入"书架"
+bookcase = append(bookcase,&b1,&b2,&b3)
+// 4.创建学生对象
+s1 := Student{"王大狗",19,bookcase}
+// 5.获取对象属性
+fmt.Printf("姓名:%s,年龄:%d\n",s1.name,s1.age)
+//fmt.Println(s1.books) //[0xc0000044c0 0xc0000044e0 0xc000004500]
+for i := 0;i < len(s1.books);i++ {
+    p := s1.books[i] // 书对象的地址
+    fmt.Printf("\t第 %d 本书名:%s,价格:%.2f\n",
+               i+1,
+               //(*p).bookname,
+               p.bookname,
+               //(*p).price,
+               p.price,
+              )
+}
+
+// s1 输出:
+姓名:王大狗,年龄:19
+第 1 本书名:孙子兵法,价格:120.80
+第 2 本书名:天局,价格:28.30
+第 3 本书名:易经经,价格:88.90
+
+s2 := Student{"李小花",18,make([]*Book,0,10)}
+s2.books = append(s2.books,
+                  &Book{"红露梦",77.8},
+                  &Book{"西游记",98.2},
+                 )
+fmt.Printf("姓名:%s,年龄:%d\n",s2.name,s2.age)
+//fmt.Println(s2.books)
+for i := 0;i < len(s2.books);i++ {
+    p := s2.books[i] // 书对象的地址
+    fmt.Printf("\t第 %d 本书名:%s,价格:%.2f\n",
+               i+1,
+               p.bookname,
+               p.price,
+              )
+}
+
+// s2输出:
+姓名:李小花,年龄:18
+第 1 本书名:红露梦,价格:77.80
+第 2 本书名:西游记,价格:98.20
+
+// 升级版: 创建一个容器,存储学生对象
+
+ss1 := make([]*Student,0,10)
+ss1 = append(ss1,&s1,&s2)
+for i := 0;i < len(ss1);i++{
+    fmt.Printf("第%d个学生的信息:\n",i+1)
+    fmt.Printf("学生姓名:%s,年龄:%d\n",ss1[i].name,ss1[i].age)
+    bookshelf := ss1[i].books //切片
+    if len(bookshelf) == 0 {
+        fmt.Println("\t\t该生不看书")
+    }else{
+        for j := 0;j < len(bookshelf);j++ {
+            p := bookshelf[j]
+            fmt.Printf("\t\t第 %d 本书名:%s,价格:%.2f\n",
+                       j+1,
+                       p.bookname,
+                       //ss1[i].books[j].bookname,
+                       p.price,
+                       //ss1[i].books[j].price,
+                      )
+        }
+    }
+}
+
+// 输出:
+第1个学生的信息:
+学生姓名:王大狗,年龄:19
+		第 1 本书名:孙子兵法,价格:120.80
+		第 2 本书名:天局,价格:28.30
+		第 3 本书名:易经经,价格:88.90
+第2个学生的信息:
+学生姓名:李小花,年龄:18
+		第 1 本书名:红露梦,价格:77.80
+		第 2 本书名:西游记,价格:98.20
+
+
+
+// 继承关系: 一个类作为另一个类的子类:子类,父类 -> is a
+type A struct{}
+type B struct{
+     A // 继承
+}
+// 一个类(子类,派生类,subClass)继承另一个类(父类,超类,基类,superClass)
+// 子类可以直接访问父类已有的属性和方法
+// 子类也可以直接创建自己的属性和方法
+// 子类也可以重写父类已有的方法
+
+type Person struct {
+	name string
+	age int
+}
+
+type Student struct {
+	Person // 继承 Person父类
+	school string // 子类的新增属性
+}
+
+// 1. 创建父类对象
+p1 := Person{name:"张三",age: 30}
+fmt.Println(p1.name,p1.age) // 张三 30
+// 2. 创建子类对象
+var s1 Student
+s1.name = "李四" // 子类对象访问父类属性
+s1.age = 18
+s1.school = "Peking-University"
+fmt.Println(s1.name,s1.age,s1.school) // 李四 18 Peking-University
+
+s2 := Student{Person{"王五",17},"清华大学"}
+fmt.Println(s2.name,s2.age,s2.school) // 王五 17 清华大学
+
+s3 := Student{Person:Person{"Rose",25},school:"新东方"}
+fmt.Println(s3.Person.name,s3.Person.age,s3.school) // Rose 25 新东方
+fmt.Println(s3.name,s3.age,s3.school) // [提升字段]  // Rose 25 新东方
 
 ```
 
