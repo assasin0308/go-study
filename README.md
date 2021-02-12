@@ -1284,6 +1284,112 @@ testInterface(m)
 
 // 注意点: 1.当需要接口类型的对象时,那么可以使用任意实现类对象代替
 //		  2.接口对象不能访问实现类的属性
+//        3.一个函数如果接受接口类型作为参数,那么实际上可以传入该接口的任意实现类对象作为参数
+//        4.定义一个类型为接口,那么实际上可以赋值任意实现类对象 
+```
+
+```go
+// 定义一个接口: Shape形状,方法: 面积,周长
+// 实现类: 矩形(长宽),圆(半径),三角形(三边长,a,b,c)
+// 测试接口函数: testShape()
+
+// 1. 定义接口
+type Shape interface {
+	peri() float64 // 周长
+	area() float64
+}
+// 2. 定义实现类
+type Triangle struct {
+	a,b,c float64
+}
+// 定义实现方法
+func (t Triangle) peri() float64{
+	return t.a + t.b + t.c
+}
+func (t Triangle) area() float64 {
+	// 海伦公式
+	peri := t.peri() / 2  // 半周长
+	s := math.Sqrt(peri * (peri - t.a) *(peri - t.b) * (peri - t.c))
+	return s
+}
+// 定义圆的类
+type Circle struct {
+	radius float64
+}
+// 定义实现方法
+func (c Circle) peri() float64 {
+	return c.radius * 2 * math.Pi
+}
+
+func (c Circle) area() float64 {
+	return math.Pow(c.radius,2)*math.Pi
+}
+
+func testShape(s Shape) {
+	fmt.Println("周长:",s.peri(),"面积:",s.area())
+}
+
+// 转型1
+func getType(s Shape) {
+	// 获取类型: instance,ok := 接口对象.(实际类型)
+	// 如果该接口对象是对应的实际类型,那么instance就是转型之后的对象,OK是true
+	if ins,ok := s.(Triangle);ok {
+		fmt.Println("是三角形,三边长是:",ins.a,ins.b,ins.c)
+	}else if ins,ok := s.(Circle);ok{
+		fmt.Println("是圆形,半径是:",ins.radius)
+	}else {
+		fmt.Println("不知道是啥形状...")
+	}
+}
+
+// 转型2
+func getType2(s Shape) {
+	// 结合switch语句  接口对象.(type)
+	switch ins := s.(type) {
+	case Triangle:
+		fmt.Println("是三角形,三边长是:",ins.a,ins.b,ins.c)
+	case Circle:
+		fmt.Println("是圆形,半径是:",ins.radius)
+	
+	}
+}
+
+
+var t1 Triangle
+t1 = Triangle{3,4,5}
+fmt.Println(t1.peri())
+fmt.Println(t1.area())
+
+var s1 Shape
+s1 = t1
+fmt.Println(s1.peri())
+fmt.Println(s1.area())
+
+var c1 Circle
+c1 = Circle{4}
+fmt.Println(c1.peri())
+fmt.Println(c1.area())
+fmt.Println(c1.radius)
+
+var s2 Shape = Circle{4}
+fmt.Println(s2.peri())
+fmt.Println(s2.area())
+
+testShape(t1)
+
+// 定义一个接口类型的数组
+arr := [4]Shape{t1,s1,s2,c1}
+fmt.Println(arr)
+
+fmt.Println(strings.Repeat(`-`,50))
+
+getType(c1)
+getType2(s2)
+```
+
+```go
+// 空接口:
+
 ```
 
 ### 16. error处理
