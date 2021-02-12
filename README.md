@@ -1388,32 +1388,408 @@ getType2(s2)
 ```
 
 ```go
-// 空接口:
+// 空接口:没有任何方法,可以将任意类型作为该接口的实现.
+type A interface {
+
+}
+
+type Cat struct {
+	name string
+	age int
+}
+type Person struct {
+	name string
+	sex string
+}
+// 将匿名空接口作为参数:表示该函数可以接受任意类型的数据
+func test(a interface{}) {
+	fmt.Println(a)
+}
+
+func test2(slice []interface{}) {
+	for i := 0;i < len(slice); i++ {
+		fmt.Println("第",i+1,"个数据:")
+		switch ins := slice[i].(type) {
+		case Cat:
+			fmt.Println("\t cat对象:",ins.name,ins.age)
+		case Person:
+			fmt.Println("\t person对象:",ins.name,ins.sex)
+		case int:
+			fmt.Println("\t int对象:",ins)
+		case string:
+			fmt.Println("\t string对象:",ins)
+		}
+	}
+}
+
+
+
+
+var a1 A = Cat{name:"花猫",age: 5}
+var a2 A = Person{name:"王二狗",sex: "男性"}
+var a3 A = "hello"
+var a4 A = 100
+test(a1)
+test(a2)
+test(a3)
+test(a4)
+// 定义一个map string作key,任意类型作为值
+map1 := make(map[string]interface{})
+map1["name"] = "assasin"
+map1["age"] = 25
+fmt.Println(map1) // map[age:25 name:assasin]
+// 定义一个切片,能够存储任意类型的数据
+slice1 := make([]interface{},0,10)
+slice1 = append(slice1,a1,a2,a3,a4)
+fmt.Println(slice1) // [{花猫 5} {王二狗 男性} hello 100]
+test2(slice1)
+//第 1 个数据:
+//cat对象: 花猫 5
+//	第 2 个数据:
+//person对象: 王二狗 男性
+//	第 3 个数据:
+//string对象: hello
+//	第 4 个数据:
+//int对象: 100
 
 ```
 
 ### 16. error处理
 
 ```go
+// 如下: 
+f,err := os.Open("./template1.md")
+if err != nil {
+    fmt.Println("err:",err)
+    return
+}
+fmt.Println(f.Name())
 
+
+// 设计一个函数,验证一个人的年龄是否合法
+func checkAge(age int) error {
+	if age < 0 {
+		return errors.New("年龄不合法") // string error
+	}
+	fmt.Println("年龄是: ",age)
+	return nil
+}
+
+
+// 1. 创建一个 error 对象
+err1 := errors.New("这就是自定义错误的信息")
+fmt.Println(err1.Error())
+fmt.Printf("%T\n",err1)
+
+err2 := checkAge(30)
+if err2 != nil {
+    fmt.Println(err2.Error())
+    return
+}
+// 2. 另一种创建 error 的方法
+err3 := fmt.Errorf("这是错误信息码:%d",100)
+fmt.Println(err3)
+
+s2 := "100"
+ll,err := strconv.ParseInt(s2,10,64)
+if err != nil {
+    fmt.Println(err.Error())
+}
+fmt.Println(ll)
+
+var l2 int64 = 100
+// int64 转字符串
+s4 := strconv.FormatInt(l2,10)
+s3 := "hello" + s4
+fmt.Println(s3) // hello100
+
+// 构建字符串
+s1 := fmt.Sprint("helloworld",25,3.145,"你好")
+fmt.Println(s1)
+s5 := fmt.Sprintf("name:%s,age:%d","王二狗",30)
+fmt.Println(s5)
+// 读取键盘输入
+//fmt.Scanln()
+//fmt.Scanf()
+// 拼接字符串
+//fmt.Sprint()
+//fmt.Sprintf()
+//fmt.Sprintln()
 ```
 
-### 17. 
+### 17. 自定义error
 
 ```go
+// 求矩形面积,若长宽为负数,返回自定义错误信息
+type errorRectangle struct {
+	msg string
+	length,width float64
+}
+func (e *errorRectangle) Error() string {
+	return fmt.Sprintf("宽是:%.2f,长是:%.2f,错误信息是:%s", e.width,e.length,e.msg)
+}
 
+func getArea(width,length float64) (float64,error) {
+	errorMsg := ""
+	if width < 0 {
+		errorMsg = "宽度是负数"
+	}
+	if length < 0 {
+		if errorMsg == "" {
+			errorMsg = "长度是负数"
+		}else{
+			errorMsg += ",长度也是负数"
+		}
+	}
+	if errorMsg != "" {
+		return 0,&errorRectangle{errorMsg,length,width}
+	}
+	area :=  length * width
+	return area,nil
+}
+
+res,err := getArea(-6,-4)
+if err != nil {
+    fmt.Println(err.Error())
+}else{
+    fmt.Println("面积是:",res)
+}
 ```
 
-### 18. 
-
 ```go
+// 练习:
 
+// 1. 求(三维)两点之间的距离
+type Point struct {
+	x,y,z float64
+}
+func (p Point) printInfo() {
+	fmt.Printf("x轴:%.2f,y轴:%.2f,z轴:%.2f\n",p.x,p.y,p.z)
+}
+func (p Point) getDistance(x1,x2,y1,y2,z1,z2 float64) float64{
+	dis := math.Sqrt(math.Pow(x1-x2,2) + math.Pow(y1-y2,2) + math.Pow(z1-z2,2))
+	return dis
+}
+
+func (p Point) getDistance2(p1,p2 Point) float64{
+	dis := math.Sqrt(math.Pow(p1.x - p2.x,2) + math.Pow(p1.y - p2.y,2) + math.Pow(p1.z - p2.z,2))
+	return dis
+}
+
+func (p Point) getDistance3(p2 Point) float64 {
+	dis := math.Sqrt(math.Pow(p.x - p2.x,2) + math.Pow(p.y - p2.y,2) + math.Pow(p.z - p2.z,2))
+	return dis
+}
+
+p1 := Point{2,4,3}
+p2 := Point{0,0,0}
+p1.printInfo()
+p2.printInfo()
+res1 := p1.getDistance(p1.x,p2.x,p1.y,p2.y,p1.z,p2.z)
+fmt.Println(res1) // 5.385164807134504
+res2 := p1.getDistance2(p1,p2)
+fmt.Println(res2) // 5.385164807134504
+res3 := p1.getDistance3(p2)
+fmt.Println(res3) // 5.385164807134504
+res4 := p2.getDistance3(p1)
+fmt.Println(res4) // 5.385164807134504
+
+// 2. 定义一个学生类,具有6个属性:姓名,年龄,性别,英语成绩,语文成绩,数学成绩,提供3个方法,求总分,求平均分,打印信息 
+type Student struct {
+	name string
+	age int
+	sex string
+	englishScore,chineseScore,mathScore float64
+}
+
+func (s Student) getSum() float64 {
+	sum := s.englishScore + s.chineseScore + s.mathScore
+	return sum
+}
+
+func (s Student) getAvg() float64 {
+	return s.getSum() / 3
+}
+
+func (s Student) printInfo() {
+	fmt.Printf("姓名:%s,年龄:%d,性别:%s\n",s.name,s.age,s.sex)
+	fmt.Printf("英语成绩:%.2f,语文成绩:%.2f,数学成绩:%.2f\n",s.englishScore,s.chineseScore,s.mathScore)
+	fmt.Printf("总分:%.2f,平均分:%.2f",s.getSum(),s.mathScore)
+}
+
+s1 := Student{"王二狗",25,"男",69.7,88.2,85.2}
+fmt.Println(s1.getSum()) // 243.10000000000002
+fmt.Println(s1.getAvg()) // 81.03333333333335
+s1.printInfo()
+// 姓名:王二狗,年龄:25,性别:男
+// 英语成绩:69.70,语文成绩:88.20,数学成绩:85.20
+// 总分:243.10,平均分:85.20
+
+// 3. 定义一个IEngine接口,3个方法,start(),speedup(),stop(),表示启动,加速,停止.定义2个结构体实现该接口:YAMAHA和HONDA,实现方式分别是 YAMAHA: 启动:60,加速:80,停止:0;HONDA 启动:40,加速:120,停止:0.定义一个Car结构体,将IEngine作为字段,再提供一个car的方法,testIEngine(),用于测试该小汽车的发动机.
+
+// 1. 定义发动机接口
+type IEngine interface {
+	start()
+	speedup()
+	stop()
+}
+// 2.定义实现类
+type YAMAHA struct {
+	name string
+}
+func (y YAMAHA) start(){
+	fmt.Println(y.name,"启动,速度60")
+}
+
+func (y YAMAHA) speedup(){
+	fmt.Println(y.name,"加速,速度80")
+}
+
+func (y YAMAHA) stop(){
+	fmt.Println(y.name,"停止,速度0")
+}
+
+type HONDA struct {
+	name string
+}
+
+func (h HONDA) start(){
+	fmt.Println(h.name,"启动,速度40")
+}
+func (h HONDA) speedup(){
+	fmt.Println(h.name,"加速,速度120")
+}
+func (h HONDA) stop(){
+	fmt.Println(h.name,"停止,速度0")
+}
+
+type Car struct {
+	iEngine IEngine // 接口类型作为字段
+}
+
+func (c Car) testIEngine() {
+	c.iEngine.start()
+	c.iEngine.speedup()
+	c.iEngine.stop()
+}
+
+c1 := Car{}
+c1.iEngine = YAMAHA{"雅马哈"}
+c1.testIEngine()
+
+c2 := Car{}
+c2.iEngine = HONDA{"本田"}
+c2.testIEngine()
 ```
 
-### 19. 
+### 18. Panic & Recover
 
 ```go
+func funcA () {
+	fmt.Println("这是一个函数funcA")
+}
+func funcB(){
+	defer func() {
+		// msg 就是panic传入的数据
+		if msg := recover();msg != nil {
+			fmt.Println(msg,"恢复啦......")
+		}
+	}()
+	for i := 0;i <=10;i++ {
+		fmt.Println("i:",i)
+		if i == 5 {
+			// 让程序中断
+			panic("funcB panic......")
+		}
+	}
+	// 当外围函数中的代码引发运行恐慌时,只有其中所有的延迟函数都执行完毕后,该运行恐慌时才会真正被扩展至调用函数
+}
 
+func funcC() {
+	defer func() {
+		fmt.Println("funcC 的延迟函数...")
+		recover()
+	}()
+	fmt.Println("这是funcC 函数")
+	panic("funcC 玩完了...")
+}
+
+funcA()
+funcB()
+funcC()
+fmt.Println("func over......")
+```
+
+### 19. Time
+
+```go
+// 1. 获取当前时间
+t1 := time.Now()
+fmt.Printf("%T\n",t1) // time.Time
+fmt.Println(t1) // 2021-02-12 23:30:59.2155127 +0800 CST m=+0.001994801
+
+// 2. 获取指定时间
+t2 := time.Date(2008,7,15,16,45,28,0,time.Local)
+fmt.Println(t2) // 2008-07-15 16:45:28 +0800 CST
+
+// 3. time -- string之间转换
+// 模板的日期必须是固定的: 6-1-2-3-4-5
+s1 := t1.Format("2006年1月2日 15:04:05")
+fmt.Println(s1) // 2021年2月12日 23:53:42
+s2 := t1.Format("2006年1月2日")
+fmt.Println(s2) // 2021年2月12日
+s3 := "1999年10月10日"
+t3,err := time.Parse("2006年1月2日",s3)
+if err != nil {
+    fmt.Println("err: ",err.Error())
+}
+fmt.Println(t3) // 1999-10-10 00:00:00 +0000 UTC
+
+// 4. 时间戳
+t4 := time.Date(1970,1,1,1,0,0,0,time.UTC)
+timestamp1 := t4.Unix() // 秒的差值
+fmt.Println(timestamp1)
+timestamp2 := t1.Unix()
+fmt.Println(timestamp2) // 当前时间戳
+timestamp3 := t4.UnixNano() // 纳秒的差值
+fmt.Println(timestamp3)
+timestamp4 := t1.UnixNano()
+fmt.Println(timestamp4)
+
+// 5. 根据当前时间获取指定的日期
+year,month,day := t1.Date()
+fmt.Println(year,month,day) // 2021 February 13
+hour,minite,second := t1.Clock()
+fmt.Println(hour,minite,second) // 0 3 29
+
+year2 := t1.Year()
+fmt.Println("年:",year2) // 年: 2021
+fmt.Println(t1.YearDay()) // 一年中第几天  44
+month2 := t1.Month()
+fmt.Println("月: ",month2) // 月:  February
+fmt.Println("日: ",t1.Day()) // 日:  13
+fmt.Println("小时: ",t1.Hour()) // 小时:  0
+fmt.Println("分钟: ",t1.Minute()) // 分钟:  7
+fmt.Println("秒: ",t1.Second()) // 秒:  0
+fmt.Println(t1.Weekday()) // 星期几 Saturday
+fmt.Println(t1.ISOWeek()) // 返回 年,第几周  2021 6
+
+// 6. 时间间隔
+t5 := t1.Add(time.Nanosecond) // duration时间间隔之后
+//t6 := t1.Add(time.Minute) // duration时间间隔之后
+fmt.Println(t1)
+fmt.Println(t5)
+fmt.Println(t1.Add(24*time.Hour))
+
+t6 := t1.AddDate(1,0,0)
+fmt.Println(t6)
+
+t7 := t5.Sub(t1) // 两个time的时间差值
+fmt.Println(t7)
+
+// 7. 睡秒
+time.Sleep(3 * time.Second) // 当前程序进入睡眠状态
+fmt.Println("main...over....")
 ```
 
 ### 20. 
