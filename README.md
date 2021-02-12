@@ -1114,40 +1114,182 @@ func (node *treeNode) setvalue(value int) {
 // nil指针也可以调用方法
 
 // 值接收者 指针接收者
-// 要改变内容必须使用指针接收者
+// 要改变内容必须使用指针+ 接收者
 // 结构过大也可以考虑使用指针接收者
 // 一致性:如有指针接收者,最好都是指针接收者
 // 值接收者是go的特性
 // 值/指针接收者均可接收值/指针
 ```
 
-### 14. 封装与包
+### 14. 方法 method
 
 ```go
-// 名字一般使用CamelCase 大驼峰
-// 首字母大写: public
-// 首字母小写: private
+// 定义:某个类别的行为功能,需要有接受者调用
+func (t Type) methodName(parameter list){
+    //TODO
+}
 
-// 每个目录就是一个包,main包包含可执行入口
-// 为结构定的方法必须放在同一个包内,可以是不同的文件
+// 1. 定义一个工人类
+type Worker struct {
+    name string
+    age int
+    sex string
+}
+type Cat struct {
+    color string
+    age int
+}
+// 2. 定义类的行为方法
+func (w Worker) work() {
+   fmt.Println(w.name,"在干活")
+}
+
+func (w *Worker) rest(){
+   fmt.Println(w.name,"在休息")
+}
+
+func (c Cat) eat(){
+   fmt.Println(c.color,"的猫在吃草")
+}
+
+func (w *Worker) printInfo() {
+   fmt.Printf("工人姓名:%s,年龄:%d,性别:%s\n",w.name,w.age,w.sex)
+}
+
+func (c Cat) printInfo(){
+   fmt.Printf("猫咪的颜色:%s,猫咪的年龄:%d",c.color,c.age)
+}
+
+
+// 3. 创建对象
+w1 := Worker{name:"王二狗",age: 30,sex:"男"}
+w1.work()  // 对象调用方法 // 王二狗 在干活
+w1.printInfo()
+
+w2 := Worker{"李小花",45,"女"}
+w2.work()
+w2.rest()
+w2.printInfo()
+
+w3 := &w2
+w3.work()
+w3.rest()
+w3.printInfo()
+
+c1 := Cat{color:"白色",age: 3}
+c1.eat()  // 白色 的猫在吃草
+c1.printInfo()
+
+
+// 继承中方法的使用:
+// 1. 结构体
+type Person struct {
+    name string
+    age int
+}
+
+type Student struct {
+    Person
+    school string
+}
+// 2. 方法
+func (p Person) eat() {
+   fmt.Println("父类的方法,吃窝窝头")
+}
+
+func (s Student) study() {
+   fmt.Printf("学生在学习...")
+}
+// 子类重写父类方法
+func (s Student) eat() {
+ fmt.Println("父类的方法,吃炸鸡,喝啤酒...")
+}
+
+
+p1 := Person{name:"王二狗",age: 25}
+fmt.Println(p1.name,p1.age) // 父类对象访问父类属性
+s1 := Student{Person{"rose",18},"清华大学"}
+fmt.Println(s1.name,s1.age) // 子类对象访问父类属性
+fmt.Println(s1.school) // 子类访问自己新增属性
+p1.eat() // 父类对象访问父类方法
+s1.eat() // 子类对象访问父类方法,存在重写,会访问子类重写的方法
+s1.study() // 子类对象访问子类新增方法
 
 ```
 
-### 15. 依赖管理
-
-```shell
-go mod init
-go build ./...
-go install ./...
-
-
-go get -u go.uber.org/zap
-```
-
-### 16. 接口
+### 15. 接口 Interface
 
 ```go
-// 
+// 定义:"接口定义对象的行为",它只指定对象应该什么,实现这种行为的方法(实现细节)是针对对象的.
+// Go中,接口是一组方法签名.当类型为接口中的所有方法提供定义时,他被称为实现接口.它与OOP非常相似.接口指定了类应该具有的方法.类型决定了如何实现这些方法.
+// 它把所有的具有共性的方法定义在一起,任何其他类型只要实现了这些方法就是实现了这个接口.
+// 接口定义了一组方法,如果某个对象实现了某个接口的所有方法,则此对象就实现了接口.
+
+type interface_name interface {
+	method_name1 [return_type]
+	method_name2 [return_type]
+	method_name3 [return_type]
+	...
+	method_namen [return_type]
+}
+
+
+// 1. 定义接口
+type USB interface {
+	start()
+	end()
+}
+// 2. 定义实现结构体
+type Mouse struct {
+	name string
+}
+// 3. 定义实现方法
+func (m Mouse) start() {
+	fmt.Println(m.name,"鼠标准备就绪,可以开始工作了,点点点....")
+}
+func (m Mouse) end() {
+	fmt.Println(m.name,"鼠标结束工作,可以安全退出了....")
+}
+// 4. 定义第二个实现结构体
+type FlashDisk struct {
+	name string
+}
+// 5. 定义实现方法
+func (f FlashDisk) start() {
+	fmt.Println(f.name,"U盘准备就绪,可以开始工作了....")
+}
+func (f FlashDisk) end() {
+	fmt.Println(f.name,"U盘结束工作,可以安全退出了....")
+}
+
+func testInterface(usb USB) {
+	usb.start()
+	usb.end()
+}
+
+m := Mouse{name: "罗技"}
+f := FlashDisk{name:"台积电"}
+var usb USB
+//var usb USB = Mouse{name:"罗技"}
+//var usb USB = FlashDisk{name:"台积电"}
+
+//usb = m // 创建该接口的任意实现类对象
+usb = f
+//fmt.Println(usb.name) //接口对象不能访问实现类的属性
+usb.start()
+usb.end()
+fmt.Println("-------------------------------")
+testInterface(m)
+//testInterface(f)
+
+// 注意点: 1.当需要接口类型的对象时,那么可以使用任意实现类对象代替
+//		  2.接口对象不能访问实现类的属性
+```
+
+### 16. error处理
+
+```go
+
 ```
 
 ### 17. 
@@ -1192,10 +1334,15 @@ go get -u go.uber.org/zap
 
 ```
 
-### 24. 
+### 24.  封装与包
 
 ```go
+// 名字一般使用CamelCase 大驼峰
+// 首字母大写: public
+// 首字母小写: private
 
+// 每个目录就是一个包,main包包含可执行入口
+// 为结构定的方法必须放在同一个包内,可以是不同的文件
 ```
 
 ### 25. 
@@ -1228,9 +1375,14 @@ go get -u go.uber.org/zap
 
 ```
 
-### 20. 
+### 20. 依赖管理
 
 ```go
+go mod init
+go build ./...
+go install ./...
 
+
+go get -u go.uber.org/zap
 ```
 
