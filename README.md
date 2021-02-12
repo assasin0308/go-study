@@ -19,7 +19,7 @@
 # 引用类型数据: slice,map,function,pointer
 
 # 浅拷贝: 拷贝的是数据的内存地址,多个变量指向同一内存地址,引用类型的数据默认都是浅拷贝: slice,map,function,
-# 深拷贝: 拷贝的是数据本身(副本),对原始数据诶呦影响,值类型的数据都是深拷贝: array,int,float,string,bool,struct
+# 深拷贝: 拷贝的是数据本身(副本),对原始数据没有影响,值类型的数据都是深拷贝: array,int,float,string,bool,struct
 
 
 
