@@ -1869,6 +1869,59 @@ fmt.Println(err)
 // 删除所有
 err1 := os.RemoveAll(`E:\golang\assasin`)
 fmt.Println(err1)
+
+
+// 7. 文件的读取
+file,err := os.Open(`E:\golang\assasin\assasin01\123.txt`)
+if err != nil {
+    fmt.Println("打开文件有错误",err.Error())
+    return
+}
+
+// 优化 循环读取
+bs := make([] byte,4,4)
+n := -1
+for {
+    n,err = file.Read(bs)
+    if n == 0 || err == io.EOF {
+        fmt.Println("读取到文件末尾了,结束文件操作...")
+        break
+    }
+    fmt.Println(string(bs[:n]))
+}
+/*
+	fmt.Println("第一次读取....")
+	n,err := file.Read(bs) // 从file中对应的文件中读取最多len(bs)个数据,存入bs数组中,n是实际读取的数量
+	fmt.Println(n) // 4
+	fmt.Println(err) // nil
+	fmt.Println(bs) //  [97 98 99 100]
+	fmt.Println(string(bs)) // abcd
+	// 二次读取
+	fmt.Println("第二次读取....")
+	n,err = file.Read(bs)
+	fmt.Println(n) // 4
+	fmt.Println(err) // <nil>
+	fmt.Println(bs) //[101 102 103 104]
+	fmt.Println(string(bs[:n])) // efgh
+	// 三次读取
+	fmt.Println("第三次读取....")
+	n,err = file.Read(bs)
+	fmt.Println(n) // 4
+	fmt.Println(err) // <nil>
+	fmt.Println(bs) //[105 106 13 10]
+	fmt.Println(string(bs)) // ij
+	// 四次读取
+	fmt.Println("第四次读取....")
+	n,err = file.Read(bs)
+	fmt.Println(n) // 2
+	fmt.Println(err) // EOF: End Of File
+	fmt.Println(bs) //[105 106 13 10]
+	fmt.Println(string(bs)) // ij
+	*/
+defer file.Close() // 关闭文件
+
+
+
 ```
 
 ### 21. 
