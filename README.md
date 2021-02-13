@@ -1882,7 +1882,8 @@ if err != nil {
 bs := make([] byte,4,4)
 n := -1
 for {
-    n,err = file.Read(bs)
+    n,err = file.Read(bs) // --> n,err
+    // 从文件开始读取数据,存入byte切片中,返回值n是本次实际读取的数据量,如果读取到文件末尾,n =0,err = EOF
     if n == 0 || err == io.EOF {
         fmt.Println("读取到文件末尾了,结束文件操作...")
         break
@@ -1921,10 +1922,96 @@ for {
 defer file.Close() // 关闭文件
 
 
+// 8. 文件的写入,若文件不存在,创建
+//file,err := os.Open(`E:\Egolang\assasin\assasin01\write.txt`)
+file,err := os.OpenFile(`E:\golang\assasin\assasin01\write.txt`,os.O_WRONLY|os.O_CREATE,os.ModePerm)
+if err != nil {
+    fmt.Println("文件不存在,",err.Error())
+}
+
+
+bs := []byte{65,66,67,68,69,70}
+n,err := file.Write(bs)
+fmt.Println(n) // 6
+fmt.Println(err) // <nil>
+
+n,err = file.WriteString("hello面朝大海")
+fmt.Println(err) // <nil>
+fmt.Println(n) // 17
+
+file.Close()
+
+file,_ = os.OpenFile(`E:\golang\assasin\assasin01\write.txt`,os.O_APPEND,os.ModePerm)
+file.WriteString("再次写入......")
+file.Close()
+
+
+// 9. 文件复制
+
+// copyfile,返回值: 拷贝数量,错误
+func copyFile(srcfile,destfile string) (int,error){
+	src,err := os.Open(srcfile)
+	if err != nil {
+		return 0,err
+	}
+	dest,err := os.OpenFile(destfile,os.O_WRONLY|os.O_CREATE,os.ModePerm)
+	if err != nil {
+		return 0,err
+	}
+	defer src.Close()
+	defer dest.Close()
+
+	bs := make([]byte,1024,1024)
+	n := -1 //读取的数据量
+	total := 0
+	for {
+		n,err = src.Read(bs)
+		if err == io.EOF || n == 0 {
+			fmt.Println("复制结束...")
+			break
+		} else if err != nil {
+			fmt.Println("复制出错...")
+			return total,err
+		}
+		total += n
+		dest.Write(bs[:n])
+	}
+
+	return total,nil
+}
+
+srcfile := `E:\golang\assasin\assasin01\img.jpg`
+destfile := `E:\golang\assasin\img_copy.jpg`
+total,err := copyFile(srcfile,destfile)
+fmt.Println(total) // 226871
+fmt.Println(err) // nil
+
+// 优化方法 io.Copy
+func copyFile1(srcfile,destfile string) (int64,error) {
+	src,err := os.Open(srcfile)
+	if err != nil {
+		return 0,err
+	}
+	dest,err := os.OpenFile(destfile,os.O_WRONLY|os.O_CREATE,os.ModePerm)
+	if err != nil {
+		return 0,err
+	}
+	defer src.Close()
+	defer dest.Close()
+
+	return  io.Copy(dest,src)
+}
+
+srcfile := `E:\golang\assasin\assasin01\img.jpg`
+destfile := `E:\golang\assasin\img_copy123.jpg`
+total,err := copyFile1(srcfile,destfile)
+fmt.Println(total) // 226871
+fmt.Println(err) // nil
+
 
 ```
 
-### 21. 
+### 21. Seek
 
 ```go
 
