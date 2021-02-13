@@ -1792,10 +1792,83 @@ time.Sleep(3 * time.Second) // 当前程序进入睡眠状态
 fmt.Println("main...over....")
 ```
 
-### 20. 
+### 20.  文件操作 & Seek
 
 ```go
+// 1. 获取文件信息
+fileinfo,err := os.Stat(`E:\golang\README.md`)
+if err != nil {
+    fmt.Println(err.Error())
+    return
+}
+fmt.Printf("%T\n",fileinfo) // *os.fileStat
+fmt.Println(fileinfo) // &{README.md 32 {2947189995 30867544} {3558147031 30867886} {376089464 30867886} 0 44404 0 0 {0 0} E:\golang\README.md 0 0 0 false}
+fmt.Println(fileinfo.Name()) // 文件名: README.md
+fmt.Println(fileinfo.IsDir()) // 是否目录 bool: false
+fmt.Println(fileinfo.Size()) // 文件大小: 44404
+fmt.Println(fileinfo.Mode()) // 文件权限: -rw-rw-rw-
+fmt.Println(fileinfo.ModTime()) // 文件修改时间: 2021-02-13 10:15:24.274572 +0800 CST
 
+
+// 2. 文件操作
+filename1 := `E:\golang\cases.md`
+filename2 := `template.md`
+// 是否绝对路径
+fmt.Println(filepath.IsAbs(filename1)) // true
+fmt.Println(filepath.IsAbs(filename2)) // false
+// 获取绝对路径,返回路径,错误
+fmt.Println(filepath.Abs(filename1)) //E:\golang\cases.md <nil>
+fmt.Println(filepath.Abs(filename2)) //E:\golang\template.md <nil>
+// 获取父级(上一级)目录
+fmt.Println(path.Join(filename2))
+
+
+// 3. 创建文件夹,若存在,则报错
+// 仅创建一层目录
+err := os.Mkdir(`E:\golang\assasin`,os.ModePerm)
+if err != nil {
+    fmt.Println(err.Error())
+}else {
+    fmt.Println("文件夹创建成功...")
+}
+// 可创建错层目录
+err1 := os.MkdirAll(`E:\golang\assasin\assasin01`,os.ModePerm)
+if err1 != nil {
+    fmt.Println(err1.Error())
+}else {
+    fmt.Println("文件夹创建成功...")
+}
+
+
+// 4. 创建文件,若已经存在,则覆盖
+file,err := os.Create(`E:\golang\assasin\assasin01\abc.txt`)
+if err != nil {
+    fmt.Println(err.Error())
+}else {
+    fmt.Println(file)
+}
+
+// 5. 打开文件
+   // os.Open 只读模式
+file,err := os.Open(`E:\golang\assasin\assasin01\abc.txt`)
+if err != nil {
+    fmt.Println("\t",err.Error())
+} else {
+    fmt.Println(file)
+}
+// 参数3个: 文件名称,文件打开方式,文件权限
+file1,err := os.OpenFile(`E:\golang\assasin\assasin01\abc.txt`,os.O_WRONLY|os.O_CREATE,os.ModePerm)
+// 关闭文件
+file1.Close()
+
+
+// 6. 删除文件夹与文件
+// 删除文件, os.Remove,若是文件夹,必须空
+err := os.Remove(`E:\golang\assasin\assasin01`)
+fmt.Println(err)
+// 删除所有
+err1 := os.RemoveAll(`E:\golang\assasin`)
+fmt.Println(err1)
 ```
 
 ### 21. 
