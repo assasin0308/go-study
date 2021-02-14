@@ -2009,9 +2009,108 @@ fmt.Println(total) // 226871
 fmt.Println(err) // nil
 
 
+// 10. seek设置光标位置
+// seek(偏移量,从哪开始)
+// 0: 开头, 1: 距离光标当前位置,2:距离文件末尾
+file,_ := os.OpenFile(`E:\golang\assasin\assasin01\123.txt`,os.O_RDWR,0)
+bs := []byte{0}
+
+file.Read(bs)
+fmt.Println(string(bs)) // a
+
+file.Seek(4,0)
+file.Read(bs)
+fmt.Println(string(bs)) // e
+
+file.Seek(2,0)
+file.Read(bs)
+fmt.Println(string(bs)) // c
+
+file.Seek(3,1)
+file.Read(bs)
+fmt.Println(string(bs)) // g
+
+file.Seek(0,2)
+file.WriteString("ABC")
+
+
+// 11. ioutil包读文件
+fileName1 := `E:\golang\assasin\assasin01\123.txt`
+// 读取文件中的所有数据
+data,err := ioutil.ReadFile(fileName1)
+fmt.Println(err)
+fmt.Println(string(data))
+
+
+// 12 写文件
+fileName2 := `E:\golang\assasin\assasin01\bbb.txt`
+s1 := "helloworld我的哥"
+err = ioutil.WriteFile(fileName2,[]byte(s1),os.ModePerm)
+fmt.Println(err)
+
+
+// 11. ioutil包读文件
+fileName1 := `E:\golang\assasin\assasin01\123.txt`
+// 读取文件中的所有数据
+data,err := ioutil.ReadFile(fileName1)
+fmt.Println(err)
+fmt.Println(string(data))
+
+// 12 写文件
+fileName2 := `E:\golang\assasin\assasin01\bbb.txt`
+s1 := "helloworld我的哥"
+err = ioutil.WriteFile(fileName2,[]byte(s1),os.ModePerm)
+fmt.Println(err)
+
+// 13. 读取文档所有数据,返回数组
+s2 := `sdfghjkxcvbnmertyuio`
+r1 := strings.NewReader(s2)
+data,err = ioutil.ReadAll(r1)
+fmt.Println(data)
+
+// 14. 读取目录,返回切片,只读一层
+dirName := `E:\golang`
+fileInfos,err := ioutil.ReadDir(dirName)
+fmt.Println(len(fileInfos))
+for i := 0;i < len(fileInfos);i++ {
+    fmt.Printf("%T\n",fileInfos)
+    fmt.Println(i,fileInfos[i].Name(),fileInfos[i].IsDir())
+}
+
+
+// 15. bufio包,高效读写,带缓存
+filename := `E:\golang\assasin\assasin01\123.txt`
+file,_ := os.Open(filename) // 看作是io包的Reader,Writer对象
+r1 := bufio.NewReader(file) // 构建带缓存的Reader对象:bufio.Reader
+fmt.Printf("%T\n",r1) // *bufio.Reader
+//data,flag,err := r1.ReadLine()
+//fmt.Println(err)
+//fmt.Println(flag)
+//fmt.Println(string(data))
+
+//s1,err := r1.ReadString('\n')
+//fmt.Println(s1)
+//fmt.Println(err)
+for {
+    s1,err := r1.ReadString('\n')
+    if err == io.EOF {
+        fmt.Println("读取完毕...")
+        break
+    }
+    fmt.Println(s1)
+}
+defer  file.Close()
+
+data,_ := r1.ReadBytes('\n')
+fmt.Println(string(data))
+
+// 获取键盘输入 带空格
+r2 := bufio.NewReader(os.Stdin)
+s2,_ := r2.ReadString('\n')
+fmt.Println(s2)
 ```
 
-### 21. Seek
+### 21. 
 
 ```go
 
