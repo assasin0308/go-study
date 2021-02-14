@@ -2110,6 +2110,67 @@ s2,_ := r2.ReadString('\n')
 fmt.Println(s2)
 ```
 
+```go
+// case1: 遍历文件夹
+func travelDir(dirname string) {
+	fileInfos,_ := ioutil.ReadDir(dirname)
+	for _,fi := range fileInfos {
+		fileName := dirname + `\` + fi.Name()
+		fmt.Println(fileName)
+		if fi.IsDir() {
+			travelDir(fileName)
+		}
+	}
+}
+// case2: 模拟聊天记录,写入本地文件
+fileName := `E:\golang\chat.txt`
+file,_ := os.OpenFile(fileName,os.O_CREATE|os.O_WRONLY|os.O_APPEND,os.ModePerm)
+//fmt.Println(filepath.Abs(fileName)) // E:\golang\chat.txt, nil
+r1 := bufio.NewReader(os.Stdin) // 创建bufio.NewReader对象读取键盘输入
+w1 := bufio.NewWriter(file) // 创建bufio.NewWriter对象跌数据到chat.txt
+
+defer file.Close()
+str := "" //表示读取到的数据
+w1.WriteString(time.Now().Format("2006-01-02"))
+w1.WriteString(time.Now().Format("\n"))
+w1.Flush() // 刷新缓冲区:将缓冲区的数据,写入目标文件中
+
+name := ""
+content := ""
+flag := true
+for {
+    // 1. 设置name
+    if flag {
+        name = "小明"
+    }else{
+        name = "小红"
+    }
+    flag = !flag
+    // 2. 读取键盘输入
+    str,_ = r1.ReadString('\n') // 读取的内容包含 \n
+    if str == "over\n" {
+        fmt.Println("程序即将退出...")
+        w1.WriteString(str)
+        w1.Flush()
+        break
+    }
+    // 3. 拼接字符串
+    //content = name + ":" + str
+    content = fmt.Sprint(name,":",str)
+    fmt.Print(content)
+    // 4. 将数据写入文件中
+    w1.WriteString(time.Now().Format("15:04:05"))
+    w1.WriteString("\n")
+    w1.WriteString(content)
+    w1.Flush()
+}
+
+// case3:断点续传 
+
+
+
+```
+
 ### 21. 
 
 ```go
