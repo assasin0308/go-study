@@ -1036,6 +1036,7 @@ for i := 0;i < len(ss1);i++{
 }
 
 // 输出:
+/*
 第1个学生的信息:
 学生姓名:王大狗,年龄:19
 		第 1 本书名:孙子兵法,价格:120.80
@@ -1046,7 +1047,7 @@ for i := 0;i < len(ss1);i++{
 		第 1 本书名:红露梦,价格:77.80
 		第 2 本书名:西游记,价格:98.20
 
-
+*/
 
 // 继承关系: 一个类作为另一个类的子类:子类,父类 -> is a
 type A struct{}
@@ -2321,8 +2322,9 @@ time.Sleep(3000*time.Millisecond)
 // go语言通过数据传递实现共享内存,而不是通过共享内存来实现消息传递.
 // channel,多个Goroutine之间传递消息的介质.
 // 操作符: <-
-// 从channel中读数据: data := <- channel
+// 从channel中读数据: data,ok := <- channel,ok为true,通道正常,data有效可用;ok为false,通道关闭,data是类型的零值
 // 向channel中写数据: channel <- data
+// 本身是安全的,同一时间只能允许一个Goroutine来读写.
 
 var ch1 chan int
 fmt.Println(ch1) //<nil>
@@ -2337,6 +2339,122 @@ go func() {
 }()
 ch1 <- 100 // 阻塞式,主Goroutine向channel中写入数据
 fmt.Println("main over ....")
+
+// channel阻塞:
+ch1 := make(chan string)
+go func() {
+    fmt.Println("子Goroutine...")
+    time.Sleep(5 * time.Second)
+    ch1 <- "hello"
+}()
+
+time.Sleep(2 * time.Second)
+data := <- ch1
+fmt.Println("读取到的数据是:",data)
+
+
+
+func func1(ch chan bool){
+	fmt.Println("func1...ch",ch)
+	for i := 1; i <= 100;i++ {
+		fmt.Println(i)
+		time.Sleep(1000)
+	}
+	ch <- true
+}
+
+func func2(ch chan bool){
+	for i := 1; i <= 100;i++ {
+		fmt.Printf("\t%d,%c\n",i,i)
+		time.Sleep(1)
+	}
+	ch <- true
+}
+
+ch1 := make(chan bool)
+fmt.Println("main... ->ch1")
+go func1(ch1)
+go func2(ch1)
+
+<- ch1
+<- ch1
+
+
+// channel关闭:发送方如果数据写入完毕,关闭通道,通知接收方数据传递完毕.
+// close(chan)
+
+func sendData(ch chan int) {
+	for i := 1; i <= 10;i++ {
+		ch <- i
+	}
+	fmt.Println("发送方写入数据完毕...")
+	// 关闭通道
+	close(ch)
+}
+
+ch1 := make(chan int)
+go sendData(ch1)
+for {
+    time.Sleep(1 * time.Second)
+    data,ok := <- ch1
+    if !ok {
+        fmt.Println("读取数据完毕....",ok)
+        break
+    }
+    fmt.Println("main中读取到数据:",data,ok)
+}
+
+//输出:
+/*  main中读取到数据: 1 true
+    main中读取到数据: 2 true
+    main中读取到数据: 3 true
+    main中读取到数据: 4 true
+    main中读取到数据: 5 true
+    main中读取到数据: 6 true
+    main中读取到数据: 7 true
+    main中读取到数据: 8 true
+    main中读取到数据: 9 true
+    main中读取到数据: 10 true
+    发送方写入数据完毕...
+    读取数据完毕.... false
+ */
+
+
+
+// for...range 读取通道数据,返回通道数据:
+//  停止条件: 通道关闭,显示的调用close函数
+func sendData(ch chan string) {
+	for i := 1;i <= 10;i++ {
+		ch <- fmt.Sprint("数据:",i)
+	}
+	fmt.Println("写入数据完毕")
+	close(ch)
+}
+
+ch1 := make(chan string)
+go sendData(ch1)
+for value := range ch1 {
+    // 停止条件: 通道关闭,显示的调用close函数
+    fmt.Println("从channel中读取到的数据:",value)
+}
+
+//输出:
+/*
+从channel中读取到的数据: 数据:1
+从channel中读取到的数据: 数据:2
+从channel中读取到的数据: 数据:3
+从channel中读取到的数据: 数据:4
+从channel中读取到的数据: 数据:5
+从channel中读取到的数据: 数据:6
+从channel中读取到的数据: 数据:7
+从channel中读取到的数据: 数据:8
+从channel中读取到的数据: 数据:9
+从channel中读取到的数据: 数据:10
+写入数据完毕
+*/
+
+
+
 ```
 
 ### 23. 
