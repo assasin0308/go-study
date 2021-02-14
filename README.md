@@ -2434,7 +2434,7 @@ func sendData(ch chan string) {
 ch1 := make(chan string)
 go sendData(ch1)
 for value := range ch1 {
-    // 停止条件: 通道关闭,显示的调用close函数
+    // 停止条件: 通道关闭,显式的调用close函数
     fmt.Println("从channel中读取到的数据:",value)
 }
 
@@ -2453,25 +2453,199 @@ for value := range ch1 {
 写入数据完毕
 */
 
+// 缓冲通道(自带一块缓冲区,可以暂存数据,若缓冲区满了,才会阻塞,默认创建的都是非缓冲通道):
+
+// 1. 非缓冲通道
+ch1 := make(chan int)
+go func() {
+    time.Sleep(3 * time.Second)
+    <- ch1 // 即时阻塞
+}()
+ch1 <- 100 // 阻塞
+fmt.Println("写入数据完毕...")
+
+// 2. 缓冲通道
+// ch2 := make(chan string,5)
+
+func sendData(ch chan string) {
+	for i := 1;i <= 100;i++ {
+		ch <- fmt.Sprint("数据:",i)
+		fmt.Println("-->写入数据:",i)
+	}
+	close(ch)
+}
+
+ch2 := make(chan string,5)
+//fmt.Printf("%T\n",ch2)
+go sendData(ch2)
+
+for {
+    time.Sleep(100 * time.Millisecond)
+    data,ok := <- ch2
+    fmt.Println("\t<--读取数据: ",data,",ok:",ok)
+    if !ok {
+        fmt.Println("<--读取完毕...")
+        break
+    }
+}
+
+
+// case: 一个goroutine写数据,另外两个goroutine读取数据
+ch1 := make(chan int,5)
+ch2 := make(chan bool) // 判断结束
+// 写入数据: 生产者
+go func() {
+    rand.Seed(time.Now().UnixNano())
+    for i := 1;i <= 100;i++ {
+        ch1 <- i
+        fmt.Println("-->写入数据:",i)
+        //time.Sleep(time.Duration(rand.Intn(1000)) * time.Millisecond)
+    }
+    close(ch1)
+}()
+// 读取数据: 消费者
+go func() {
+    for data := range ch1 {
+        fmt.Println("\t<--消费者1:",data)
+        time.Sleep(time.Duration(rand.Intn(1000)) * time.Millisecond)
+    }
+    ch2 <- true
+}()
+go func() {
+    for data := range ch1 {
+        fmt.Println("\t<--消费者2:",data)
+        time.Sleep(time.Duration(rand.Intn(1000)) * time.Millisecond)
+    }
+    ch2 <- true
+}()
+
+<-ch2
+<-ch2
+fmt.Println("main over...")
+
+
+// 定向通道(单向通道)只读的或只写的通道:
+// 只读通道: make(<- chan Type),只能读取数据,不能写入
+// 只写通道: make(chan <- Type),只能写入数据,不能读取
+// 创建通道时,采用单向通道,是没有意义的.
+// 使用场景: 传递参数的时候使用,限定某个函数只有写数据或读取数据,在语法级别保证通道的操作安全.
+
+
+func main() {
+	// 双向通道
+	ch1 := make(chan string)
+	go func1(ch1)
+	time.Sleep(3 * time.Second)
+	data := <- ch1
+	fmt.Println("接收到数据:",data)
+	ch1 <- "你要上学吗?"
+
+
+	func2(ch1)
+	func3(ch1)
+
+}
+func func1(ch chan string) {
+	ch <- "我是小明"
+	time.Sleep(2 * time.Second)
+	data := <- ch
+	fmt.Println("回应:",data)
+}
+
+// 只能写入数据,不能读取
+func func2(ch chan <- string) {
+	//TODO
+}
+// 只能读取数据,不能写入
+func func3(ch <- chan string) {
+	//TODO
+
+}
+
+// 注意点:
+for i := 1;i <= 3;i++ {
+    go func(i int) {
+        fmt.Println("第",i,"个goroutine")
+    }(i)
+    //time.Sleep(10 * time.Millisecond)
+}
+//或
+for i := 1;i <= 3;i++ {
+    i := i
+    go func() {
+        fmt.Println("第",i,"个goroutine")
+    }()
+}
+time.Sleep(1 * time.Second)
 
 
 ```
 
-### 23. 
+### 23. Timer计时器
 
 ```go
+//  Timer 计时器
+timer1 := time.NewTimer(3 * time.Second)
+fmt.Printf("%T\n",timer1) // *time.Timer
+fmt.Println(time.Now()) // 2021-02-14 23:41:03.0132543 +0800 CST m=+0.002032701
+time1 := <- timer1.C // 读取数据
+fmt.Println(time1) // 2021-02-14 23:41:06.0160538 +0800 CST m=+3.004832201
 
+fmt.Println("-----------------")
+// 使用after,返回值 <- chan Time
+ch1 := time.After(5 * time.Second)
+fmt.Println(time.Now()) // 2021-02-14 23:45:13.3266743 +0800 CST m=+3.007278401
+time2 := <- ch1
+fmt.Println(time2) // 2021-02-14 23:45:18.3318006 +0800 CST m=+8.012404701
 ```
 
-### 24.  封装与包
+### 24.  Select
 
 ```go
-// 名字一般使用CamelCase 大驼峰
-// 首字母大写: public
-// 首字母小写: private
+// 类似于switch语句,但select会随机执行一个可运行的case.如果没有case可以运行,若有default语句,则执行default中,否则将会阻塞,直到有case可以运行.
+// 每个case后的操作都会运算,若多个都可执行,select会随机执行一个可运行的case.
 
-// 每个目录就是一个包,main包包含可执行入口
-// 为结构定的方法必须放在同一个包内,可以是不同的文件
+var ch1,ch2,ch3 chan int
+var n1,n2 int
+select {
+    case n1 = <- ch1:
+    fmt.Println("received:",n1,"from ch1\n")
+    case ch2 <- n2:
+    fmt.Println("send",n2,"to ch2 \n")
+    case n3,ok := (<-ch3): //same as n3,ok := <- ch3
+    if ok {
+        fmt.Println("received",n3,"from ch3\n")
+    } else {
+        fmt.Println("ch3 is closed...\n")
+    }
+    default:
+    fmt.Println("no communication\n")
+}
+ 
+// 输出: no communication
+
+
+ch1 := make(chan int)
+ch2 := make(chan int)
+go func() {
+    time.Sleep(3 * time.Second)
+    ch1 <- 100
+}()
+go func() {
+    time.Sleep(3 * time.Second)
+    ch2 <- 200
+}()
+select {
+    case data,ok := <- ch1:
+    fmt.Println("ch1中读取数据:",data,ok)
+    case data := <- ch2:
+    fmt.Println("ch2中读取数据:",data)
+    default:
+    fmt.Println("执行了default...")
+}
+
+
+
 ```
 
 ### 25. 
@@ -2498,13 +2672,18 @@ for value := range ch1 {
 
 ```
 
-### 19. 
+### 29. 封装与包
 
 ```go
+// 名字一般使用CamelCase 大驼峰
+// 首字母大写: public
+// 首字母小写: private
 
+// 每个目录就是一个包,main包包含可执行入口
+// 为结构定的方法必须放在同一个包内,可以是不同的文件
 ```
 
-### 20. 依赖管理
+### 30. 依赖管理
 
 ```go
 go mod init
