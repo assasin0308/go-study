@@ -2165,9 +2165,57 @@ for {
     w1.Flush()
 }
 
-// case3:断点续传 
+// case3: 断点续传,以文件复制为例
+
+srcfile := `E:\golang\assasin\123.jpg`
+destfile := `E:\golang\assasin\assasin01\123_copy.jpg`
+tmpfile := `E:\golang\assasin\assasin01\123_copy.jpg.txt`
+
+file1,_ := os.Open(srcfile)
+defer  file1.Close()
+file2,_ := os.OpenFile(destfile,os.O_CREATE|os.O_WRONLY,os.ModePerm)
+defer  file2.Close()
+file3,_ := os.OpenFile(tmpfile,os.O_CREATE|os.O_RDWR,os.ModePerm)
+
+// 1. 读物临时文件的数据
+file3.Seek(0,0)
+bs := make([]byte,100,100)
+n1,err:= file3.Read(bs)
+countStr := string(bs[:n1]) // 去掉 \n
+fmt.Println(countStr)
+//count,_ := strconv.Atoi(countStr)
+count,_ := strconv.ParseInt(countStr,10,64)
+fmt.Println(count)
+// 2. 设置读写的偏移量
+file1.Seek(count,0)
+file2.Seek(count,0)
+
+data := make([]byte,1024,1024)
+n2 := -1  //读入的数据量
+n3 := -1  // 写出的数据量
+total := int(count) // 读取的数据量
+for {
+    // 读取数据
+    n2,err = file1.Read(data)
+    if err == io.EOF {
+        fmt.Println("文件复制完毕")
+        file3.Close()
+        os.Remove(tmpfile)
+        break
+    }
+    //将数据写入目标文件
+    n3,_ = file2.Write(data[:n2])
+    total += n3
+    // 将复制总量写入临时文件
+    file3.Seek(0,0)
+    file3.WriteString(strconv.Itoa(total))
 
 
+    // 模拟断点
+    //if total > 10000 {
+    //	panic("断电了....")
+    //}
+}
 
 ```
 
