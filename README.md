@@ -13,12 +13,12 @@
 # 数据类型:
 
 # 基本数据类型: bool,string,int,float
-# 复合数据类型: array,slice,map,struct,pointer,interface,function......
+# 复合数据类型: array,slice,map,struct,pointer,interface,channel,function......
 
 # 值类型数据: bool,string,int,float,array,struct
-# 引用类型数据: slice,map,function,pointer
+# 引用类型数据: slice,map,function,pointer,channel
 
-# 浅拷贝: 拷贝的是数据的内存地址,多个变量指向同一内存地址,引用类型的数据默认都是浅拷贝: slice,map,function,
+# 浅拷贝: 拷贝的是数据的内存地址,多个变量指向同一内存地址,引用类型的数据默认都是浅拷贝: slice,map,function,channel
 # 深拷贝: 拷贝的是数据本身(副本),对原始数据没有影响,值类型的数据都是深拷贝: array,int,float,string,bool,struct
 
 
@@ -2253,23 +2253,77 @@ func hello() {
 	fmt.Println("这是一个函数,在另外一个Goroutine中执行")
 }
 
-// 1. 先创建主Goroutine,
-
-
 
 //输出:
 这是一个函数,在另外一个Goroutine中执行
 main......
-或
+//或
 main......
 这是一个函数,在另外一个Goroutine中执行
-或
+//或
 main......
+
+
 ```
 
-### 22. 
+```go
+// case 1
+func func1 (){
+	for i := 0;i <= 1000;i++ {
+		fmt.Println("子Goroutine中i的值:",i)
+		time.Sleep(1*100)
+
+	}
+}
+
+func func2() {
+	for i := 1;i <= 1000;i++ {
+		fmt.Printf("\t子Goroutine中字母:%d,%c\n",i,i)
+		time.Sleep(1*10)
+	}
+}
+
+go func1()
+go func2()
+fmt.Println("main......")
+time.Sleep(1*time.Second)
+
+// case 2
+func func1(){
+	for i := 1;i <= 5;i++{
+		time.Sleep(250 * time.Millisecond)
+		fmt.Print(i,"\t")
+	}
+}
+
+func func2(){
+	for i := 65;i <= 70;i++ {
+		time.Sleep(400 * time.Millisecond)
+		fmt.Printf("%c\t",i)
+	}
+}
+
+go func1()
+go func2()
+time.Sleep(3000*time.Millisecond)
+
+// case 4 
+
+// 获取当前计算机逻辑CPU核数
+	fmt.Println("逻辑CPU的核数:",runtime.NumCPU())
+	// 设置当前go程序执行的最大逻辑CPU核数
+	runtime.GOMAXPROCS(runtime.NumCPU()) //默认是 1
+```
+
+### 22. Channel 
 
 ```go
+// go语言通过数据传递实现共享内存,而不是通过共享内存来实现消息传递.
+// channel,多个Goroutine之间传递消息的介质.
+// 操作符: <-
+// 从channel中读数据: data := <- channel
+// 向channel中写数据: channel <- data
+
 
 ```
 
