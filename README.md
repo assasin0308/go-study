@@ -2134,7 +2134,7 @@ defer file.Close()
 str := "" //表示读取到的数据
 w1.WriteString(time.Now().Format("2006-01-02"))
 w1.WriteString(time.Now().Format("\n"))
-w1.Flush() // 刷新缓冲区:将缓冲区的数据,写入目标文件中
+w1.Flush() // 刷新缓存区:将缓存区的数据,写入目标文件中
 
 name := ""
 content := ""
@@ -2453,9 +2453,9 @@ for value := range ch1 {
 写入数据完毕
 */
 
-// 缓冲通道(自带一块缓冲区,可以暂存数据,若缓冲区满了,才会阻塞,默认创建的都是非缓冲通道):
+// 缓存通道(自带一块缓存区,可以暂存数据,若缓存区满了,才会阻塞,默认创建的都是非缓存通道):
 
-// 1. 非缓冲通道
+// 1. 非缓存通道
 ch1 := make(chan int)
 go func() {
     time.Sleep(3 * time.Second)
@@ -2464,7 +2464,7 @@ go func() {
 ch1 <- 100 // 阻塞
 fmt.Println("写入数据完毕...")
 
-// 2. 缓冲通道
+// 2. 缓存通道
 // ch2 := make(chan string,5)
 
 func sendData(ch chan string) {
@@ -2645,12 +2645,224 @@ select {
 }
 
 
+// 注意循环的结束, 贴标签
+
+ch1 := make(chan int)
+ch2 := make(chan int)
+
+go func() {
+    ch1 <- 100
+    close(ch1)
+}()
+go func() {
+    ch2 <- 200
+}()
+
+// 通道关闭或超时5次结束循环
+count := 0
+out : for {
+    time.Sleep(1 * time.Second)
+    select {
+        case data,ok := <- ch1 :
+        if !ok {
+            fmt.Println("ch1关闭了...")
+            break out
+        }
+        fmt.Println("ch1读取数据:",data)
+        case data := <- ch2:
+        fmt.Println("ch2读取数据:",data)
+        case <- time.After( 2 * time.Second):
+        fmt.Println("超时 2 秒钟")
+        count++
+        if count == 5 {
+            break out
+        }
+        //default:
+        //	fmt.Println("default....")
+    }
+}
 
 ```
 
-### 25. 
+### 25. WaitGroup 同步等待组
 
 ```go
+// 同步等待组: 
+// 内置计数器:要执行的goroutine的数量
+// Add(),设置计数器的数量
+// Done(),将内置计数器的数值减1,同Add(-1)
+// Wait(),等待,导致执行wait的goroutine进入阻塞.同步等待组的计数器为0时,解除阻塞.
+
+
+func func1(wg *sync.WaitGroup){
+	rand.Seed(time.Now().UnixNano())
+	for i := 1;i <= 100;i++ {
+		fmt.Println("子goroutine1,i:",i)
+		time.Sleep(time.Duration(rand.Intn(1000)))
+	}
+	wg.Done()
+
+}
+func func2(wg *sync.WaitGroup){
+	for j := 1;j <= 100;j++ {
+		fmt.Println("子goroutine2,j:",j)
+		time.Sleep(time.Duration(rand.Intn(1000)))
+	}
+	wg.Done()
+}
+
+/*
+同步等待组:WaitGroup,执行Wait()的goroutine,要等待同步等待组中的其他goroutine执行完毕.
+内置的计数器 counter: 0
+Add():设置counter的值
+Done():将counter的值 -1 ,同Add(-1)
+Wait():哪个goroutine执行了,name就会阻塞,知道counter = 0 解除阻塞
+*/
+var wg sync.WaitGroup
+//fmt.Printf("%T\n",wg) //sync.WaitGroup
+//fmt.Println(wg) // {{} [0 0 0]}
+wg.Add(2)
+
+go func1(&wg)
+go func2(&wg)
+wg.Wait() // main,进入阻塞状态,底层计数器为0,解除阻塞
+fmt.Println("main解除阻塞,结束...")
+
+
+
+// 共享数据的安全性问题:
+
+// case : 模拟车站卖票,车票100张,4个售票口(4个goroutine)
+var tickets = 100 // 全局变量
+var wg sync.WaitGroup
+func main() {
+	wg.Add(4)
+	go saleTickets("售票口1")
+	go saleTickets("售票口2")
+	go saleTickets("售票口3")
+	go saleTickets("售票口4")
+
+	wg.Wait()
+	fmt.Println("本次列车所有车票已售完,程序结束...")
+
+}
+
+func saleTickets(name string) {
+	rand.Seed(time.Now().UnixNano())
+	for {
+		if tickets > 0 {
+			time.Sleep(time.Duration(rand.Intn(1000)))
+			fmt.Println(name,":",tickets)
+			tickets --
+		} else {
+			fmt.Println(name,"停止售票...")
+			break
+		}
+	}
+	wg.Done()
+}
+/*
+......
+售票口2 : 3
+售票口3 : 2
+售票口3 停止售票...
+售票口1 : 0
+售票口1 停止售票...
+售票口2 : -1
+售票口4 : -1
+售票口4 停止售票...
+售票口2 停止售票...
+本次列车所有车票已售完,程序结束...
+*/
+
+// 优化方法: 互斥锁
+
+/*
+互斥锁:
+Lock(),上锁事件是阻塞的,只能有一个goroutine上锁,其他goroutine处于阻塞状态
+Unlock(),
+*/
+var mutex sync.Mutex
+fmt.Println("main即将锁定...")
+mutex.Lock()
+fmt.Println("main已经锁定...")
+
+for i := 1;i <= 3;i++ {
+    go func(i int) {
+        fmt.Println("子goroutine,i:",i,"即将锁定....")
+        mutex.Lock() //导致阻塞
+        fmt.Println("子goroutine,i:",i,"已经锁定")
+    }(i)
+}
+
+time.Sleep(5 * time.Second)
+fmt.Println("main即将解锁...")
+mutex.Unlock()
+fmt.Println("main已经解锁...")
+
+time.Sleep(3 * time.Second)
+
+/*
+输出:
+main即将锁定...
+main已经锁定...
+子goroutine,i: 1 即将锁定....
+子goroutine,i: 3 即将锁定....
+子goroutine,i: 2 即将锁定....
+main即将解锁...
+main已经解锁...
+子goroutine,i: 3 已经锁定
+*/
+
+
+// 卖票案例优化:
+var tickets = 100 // 全局变量
+var wg sync.WaitGroup
+var mutex sync.Mutex // 互斥锁
+func main() {
+	wg.Add(4)
+	go saleTickets("售票口1")
+	go saleTickets("售票口2")
+	go saleTickets("售票口3")
+	go saleTickets("售票口4")
+
+	wg.Wait()
+	fmt.Println("本次列车所有车票已售完,程序结束...")
+
+}
+
+func saleTickets(name string) {
+	rand.Seed(time.Now().UnixNano())
+	for {
+		mutex.Lock()
+		if tickets > 0 {
+			time.Sleep(time.Duration(rand.Intn(1000)))
+			fmt.Println(name,":",tickets)
+			tickets --
+		} else {
+			fmt.Println(name,"停止售票...")
+			mutex.Unlock() // 结束之前开锁
+			break
+		}
+		mutex.Unlock()
+	}
+	wg.Done()
+}
+
+/*
+输出:
+......
+售票口4 : 5
+售票口2 : 4
+售票口3 : 3
+售票口1 : 2
+售票口4 : 1
+售票口2 停止售票...
+售票口3 停止售票...
+售票口1 停止售票...
+售票口4 停止售票...
+本次列车所有车票已售完,程序结束...
+*/
 
 ```
 
