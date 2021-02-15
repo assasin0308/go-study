@@ -2866,43 +2866,388 @@ func saleTickets(name string) {
 
 ```
 
-### 26. 
+### 26. 读写锁
 
 ```go
+/*
+读写锁: sync.RWMutex()
+Lock(),写锁定
+Unlock(),写解锁
+Rlock(), 读锁定
+RUnlock(),读解锁
+锁定规则:
+	1. 读写锁使用中,所有写错做都是互斥的
+	2. 读写锁使用中,读和写是互斥的
+	2. 读写锁使用中,读和读不互斥
+	可以允许多个goroutine同时读数据,但是写操作只允许一个goroutine执行
+*/
+
+
+func main() {
+	var rwm sync.RWMutex
+
+	for i := 1;i <= 3;i++ {
+		go func(i int) {
+			fmt.Printf("goroutine %d 尝试读锁定...\n",i)
+			rwm.RLock()
+			fmt.Printf("goroutine %d 已经读锁定...\n",i)
+			time.Sleep(5 * time.Second)
+			fmt.Printf("goroutine %d 已经读解锁...\n",i)
+			rwm.RUnlock()
+		}(i)
+	}
+	time.Sleep(1 * time.Second)
+	fmt.Println("main...尝试写锁定")
+	rwm.Lock()
+	fmt.Println("main已经写锁定...")
+	rwm.Unlock()
+	fmt.Println("main写解锁...")
+	
+}
+/*
+输出:
+goroutine 2 尝试读锁定...
+goroutine 2 已经读锁定...
+goroutine 1 尝试读锁定...
+goroutine 1 已经读锁定...
+goroutine 3 尝试读锁定...
+goroutine 3 已经读锁定...
+main...尝试写锁定
+goroutine 1 已经读解锁...
+goroutine 3 已经读解锁...
+goroutine 2 已经读解锁...
+main已经写锁定...
+main写解锁...
+*/
+
+
+var n int
+var wg sync.WaitGroup
+var rwm sync.RWMutex
+func main() {
+	wg.Add(10)
+	for i := 1;i <= 5;i++ {
+		go Read(i)
+	}
+
+	for i := 1;i <= 5;i++ {
+		go Write(i)
+	}
+
+	wg.Wait()
+
+}
+func Write(i int) {
+	defer wg.Done()
+	rand.Seed(time.Now().UnixNano())
+	rwm.Lock()
+	fmt.Println("写操作:", i, "即将写入数据...")
+	randNum := rand.Intn(100) + 1
+	n = randNum
+	fmt.Println("写操作:", i, "已经写入数据:", n)
+	rwm.Unlock()
+}
+
+func Read(i int) {
+	defer wg.Done()
+	rwm.RLock()
+	fmt.Println("读操作:",i,"即将读取数据...")
+	v := n
+	fmt.Println("读操作:",i,"读取了数据:",v)
+	rwm.RUnlock()
+}
+
+
 
 ```
 
-### 27. 
+### 27. 并发操作map
 
 ```go
+var rwm sync.RWMutex
+map1 := make(map[string] string)
+for i := 1;i <= 100;i ++{
+    go func(i int) {
+        rwm.Lock()
+        map1[fmt.Sprintf("key,%d",i)] = fmt.Sprint("数据:",i)
+        rwm.Unlock()
+    }(i)
+}
+time.Sleep(2 * time.Second)
+fmt.Println(map1)
+
+// 输出: map[key,1:数据:1 key,10:数据:10 key,2:数据:2 key,3:数据:3 key,4:数据:4 key,5:数据:5 key,6:数据:6 key,7:数据:7 key,8:数据:8 key,9:数据:9]
+
+// 封装map支持并发操作:
+type MyMap struct {
+	map1 map[string] string
+	rwm sync.RWMutex
+}
+
+func (m *MyMap) Put(key,value string) {
+	m.rwm.Lock()
+	m.map1[key] = value
+	m.rwm.Unlock()
+}
+
+func (m *MyMap) Get(key string) string {
+	m.rwm.RLock()
+	defer m.rwm.RUnlock()
+	return m.map1[key]
+}
+
+func main() {
+	var wg sync.WaitGroup
+	wg.Add(10)
+	m1 := make(map[string] string)
+	var rwm sync.RWMutex
+	m2 := MyMap{m1,rwm}
+	for i := 1;i <= 10;i ++ {
+		go func(i int) {
+			m2.Put(fmt.Sprint("key",i),fmt.Sprint("data",i))
+			wg.Done()
+		}(i)
+	}
+
+	wg.Wait()
+	fmt.Println("main读取数据...")
+	for i := 1;i <= 10;i ++ {
+		fmt.Println(m2.Get(fmt.Sprint("key",i)))
+	}
+	fmt.Println("main over...")
+}
+
+/*
+输出:
+main读取数据...
+data1
+data2
+data3
+data4
+data5
+data6
+data7
+data8
+data9
+data10
+main over...
+*/
 
 ```
 
-### 28. 
+### 28. 条件变量Cond
 
 ```go
+/*
+	条件变量: sync.Cond,读个goroutine等待或接受通知的集合地
+	L : Locker 接口
+	3个指针方法:
+		Wait(),goroutine等待接受通知,Single(),Broadcast()
+		Single(),发送通知,一个
+		Broadcast(),广播,发送给所有
+*/
+func main() {
+	var mutex  sync.Mutex
+	cond :=  sync.Cond{L:&mutex}
+	condition := false
+
+	go func() {
+		time.Sleep(1 * time.Second)
+		cond.L.Lock()
+		fmt.Println("子goroutine已经锁定")
+		fmt.Println("子goroutine更改条件数值,并发送通知...")
+		condition = true
+		cond.Signal() // 发送通知:一个goroutine,
+		time.Sleep(5 * time.Second)
+		fmt.Println("子goroutine继续...")
+		fmt.Println("子goroutine已经解锁")
+		cond.L.Unlock()
+	}()
+
+	cond.L.Lock()
+	fmt.Println("main已经锁定...")
+	if !condition {
+		fmt.Println("main 即将等待")
+		// wait尝试先解锁,等待 --->当前的goroutine进入阻塞状态,等待被唤醒,Single或Broadcast
+		// 被唤醒后,又会去锁定
+		cond.Wait()
+		fmt.Println("main被唤醒...")
+	}
+	fmt.Println("main继续其他工作...")
+	fmt.Println("main解锁...")
+	cond.L.Unlock()
+}
+
+/*
+输出:
+main已经锁定...
+main 即将等待
+子goroutine已经锁定
+子goroutine更改条件数值,并发送通知...
+子goroutine继续...
+子goroutine已经解锁
+main被唤醒...
+main继续其他工作...
+main解锁...
+*/
+
+
+// case:
+
+func main() {
+	var count = 4
+	var wg sync.WaitGroup
+	wg.Add(5)
+
+	// 新建cond
+	var mutex sync.Mutex
+	cond := sync.NewCond(&mutex)
+
+	for i := 0;i < 5; i++ {
+		go func(i int) {
+			// 争抢互斥锁的锁定
+			cond.L.Lock()
+			//条件是否达成
+			for count > i {
+				cond.Wait()
+				fmt.Printf("收到第一个通知 goroutine %d\n",i)
+			}
+			fmt.Printf("goroutine %d 执行结束\n",i)
+			cond.L.Unlock()
+			wg.Done()
+		}(i)
+	}
+	// 确保所有 goroutine启动完毕
+	time.Sleep(20 * time.Millisecond)
+	// 锁定一下,改变 count的值
+	fmt.Println("broadcast...")
+	cond.L.Lock()
+	count -= 1
+	cond.Broadcast()
+	fmt.Println("第一次,广播结束...")
+	cond.L.Unlock()
+
+	time.Sleep(2 * time.Second)
+	fmt.Println("------------------------")
+	fmt.Println("signal...")
+	cond.L.Lock()
+	count -= 2
+	cond.Signal()
+	fmt.Println("第二次,单发通知结束...")
+	cond.L.Unlock()
+
+	time.Sleep(2 * time.Second)
+	fmt.Println("------------------------")
+	fmt.Println("broadcast")
+	cond.L.Lock()
+	count -= 1
+	cond.Broadcast()
+	fmt.Println("第三次,广播结束...")
+	cond.L.Unlock()
+
+	wg.Wait()
+
+}
+
+/*
+输出:
+goroutine 4 执行结束
+broadcast...
+第一次,广播结束...
+收到第一个通知 goroutine 1
+收到第一个通知 goroutine 0
+收到第一个通知 goroutine 2
+收到第一个通知 goroutine 3
+goroutine 3 执行结束
+------------------------
+signal...
+第二次,单发通知结束...
+收到第一个通知 goroutine 1
+goroutine 1 执行结束
+------------------------
+broadcast
+第三次,广播结束...
+收到第一个通知 goroutine 2
+goroutine 2 执行结束
+收到第一个通知 goroutine 0
+goroutine 0 执行结束
+
+*/
+
 
 ```
 
-### 29. 封装与包
+### 29. sync的其他操作
 
 ```go
-// 名字一般使用CamelCase 大驼峰
-// 首字母大写: public
-// 首字母小写: private
+// 1. 原子操作
+/*
+针对数值:通过原子性方法操作某个数值时,其他goroutine不能再访问当前的数值变量.
+操作: 原子加/减
+	  交换
+	  比较并交换:CAS
+	  存储
+	  加载
+原子性操作: sync.atomic
+非原子性操作:
+*/
+var n int64 = 3
+fmt.Println(`n的原始数值是:`,n)
+//原子加 返回新值
+newN := atomic.AddInt64(&n,1)
+fmt.Println("新的数据newN:",newN)
+fmt.Println("n的新值:",n)
 
-// 每个目录就是一个包,main包包含可执行入口
-// 为结构定的方法必须放在同一个包内,可以是不同的文件
-```
+atomic.SwapInt64(&n,9) //更新数据
+atomic.CompareAndSwapInt64(&n,4,10) //比较并交换
 
-### 30. 依赖管理
+/*
+输出:
+n的原始数值是: 3
+新的数据newN: 4
+n的新值: 4
+*/
 
-```go
-go mod init
-go build ./...
-go install ./...
+// 2. 一次操作
+/*
+一次操作: 某些操作只需要一次
+Do(func()) -> 设置多次,也只会执行一次
+*/
+count := 0
+once := sync.Once{}
+for i := 1;i <= 10;i++ {
+    once.Do(func() {
+        count++
+    })
+}
+fmt.Println(count)
 
 
-go get -u go.uber.org/zap
+// 3. 临时对象池
+/*
+临时对象池:能够复用某些数据的容器,并可伸缩,同步安全
+sync.Pool
+	Put(),向pool存储数据
+	Get(),获取一个数据,若pool中没有,则调用New对应函数,创建一个
+若程序垃圾回收机制运行,则pool中数据都会没有了
+*/
+var count int64
+fun := func() interface{} {
+    return atomic.AddInt64(&count,1)
+}
+pool := sync.Pool{New:fun}
+// 获取数据
+fmt.Println(pool.Get())
+// 存储数据
+pool.Put(10)
+pool.Put(2)
+pool.Put(8)
+pool.Put(15)
+fmt.Println(pool.Get()) // 有多个数据,任意获取一个,若pool中没有,则调用New对应函数,创建一个
+
+// 执行GC()
+runtime.GC()
+pool.New = nil
+fmt.Println(pool.Get())
 ```
 
