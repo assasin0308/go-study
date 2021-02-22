@@ -7,6 +7,10 @@
 // 国内镜像: go env -w GOPROXY=https://goproxy.cn,direct
 // go env -w GO111MODULE=on
 // go get -v golang.org/x/tools/cmd/goimports
+
+
+go mod init gin
+go mod edit -require github.com/gin-gonic/gin@latest
 ```
 
 ```json
