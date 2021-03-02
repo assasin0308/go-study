@@ -111,16 +111,47 @@ func main() {
 
 ```
 
-### 4. 
+### 4. RPC与Protobuf
 
 ```go
+go get github.com/golang/protobuf/protoc-gen-go
+go get github.com/golang/protobuf/proto
+// https://github.com/assasin0308/protobuf.git
+// 执行 protoc --go_out=. *.proto 生成 test.pb.go 文件
+
+
+// 需求: 假设在一个系统中,有订单模块(Order),其他模块想要实现RPC的远程工具调用,根据订单ID和时间戳可以获取订单信息.如果查询获取成功就返回相应的订单信息,如果查询不到返回失败信息.
+
+// 1. 数据定义,根据需求,定义message.proto 文件
+
+syntax = "proto3";
+
+package message;
+// 订单参数请求
+message OrderRequest {
+    string orderId = 1;
+    int64 timeStamp = 2;
+}
+        
+//订单信息
+message OrderInfo {
+    string OrderId = 1;
+    string OrderName = 2;
+    string OrderStatus = 3;
+}
 
 ```
 
-### 5. 
+### 5. RPC框架
 
 ```go
+// https://grpc.io/
+// https://github.com/assasin0308/grpc.git
 
+go get -u google.golang.org/grpc
+
+// 执行 protoc --go_out=. *.proto 生成 test.pb.go 文件
+// gRpc支持: protoc --go_out=plugins=grpc:. *.proto
 ```
 
 ### 6. 
