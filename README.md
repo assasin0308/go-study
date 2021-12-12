@@ -25,6 +25,17 @@ go mod edit -require github.com/gin-gonic/gin@latest
 # 浅拷贝: 拷贝的是数据的内存地址,多个变量指向同一内存地址,引用类型的数据默认都是浅拷贝: slice,map,function,channel
 # 深拷贝: 拷贝的是数据本身(副本),对原始数据没有影响,值类型的数据都是深拷贝: array,int,float,string,bool,struct
 
+# Printf
+%T : 打印变量的数据类型
+%d : 打印正数,10进制
+%f : 打印浮点数
+%t : 打印bool数据
+%s : 打印字符串
+%v : 原样输出
+%c : 打印对应的字符
+%p : 与%c类似
+
+
 
 
 ```
