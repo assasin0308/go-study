@@ -18,6 +18,32 @@ go mod edit -require github.com/gin-gonic/gin@latest
 
 # 基本数据类型: bool,string,int,float
 # 复合数据类型: array,slice,map,struct,pointer,interface,channel,function......
+	* 基本数据类型: 数值类型 布尔类型 字符串类型
+			** 数值类型: 整数 int ,浮点 float ,复数 complex
+	                     *** 整数类型:
+				   **** 有符号: 正数与负数
+	                                   int8,8个01码表示的整数,最高位符号位0表示正数,1表示负数,剩余7位表示数值 [-128,127]
+	                                   int16 [-32768,32767]
+	                                   int32 [-2147483648,2147483647]
+	                                   int64 [-9223372036854775808,9223372036854775807]
+	                           ****无符号: 正数(无负数)
+	                                   uint8:8个01码都表示数值 [0,255]
+	                                   uint16: [0,65535]
+	                                   uint32: [0,4294967295]
+	                                   uint64: [0,18446744073709551615]
+
+	                           byte 可以理解为 uint8 的别名
+	                           rune 可以理解为 int32 的别名
+
+	                     *** 浮点数类型:
+	                           **** float32: 32位浮点型数(单精度)
+	                           **** float64: 64位浮点型数(双精度)
+	                     *** 复数类型:
+	                           **** complex32:
+	                           **** complex64:
+	            ** 布尔类型: true , false
+				** 字符串类型: 使用双引号 或者 ``;
+	* 复合数据类型:
 
 # 值类型数据: bool,string,int,float,array,struct
 # 引用类型数据: slice,map,function,pointer,channel
