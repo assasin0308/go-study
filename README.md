@@ -59,7 +59,8 @@ go mod edit -require github.com/gin-gonic/gin@latest
 %s : 打印字符串
 %v : 原样输出
 %c : 打印对应的字符
-%p : 与%c类似
+%p : 与%c类似 数值对
+%p : 地址
 
 
 
