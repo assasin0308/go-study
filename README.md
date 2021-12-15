@@ -61,7 +61,10 @@ go mod edit -require github.com/gin-gonic/gin@latest
 %c : 打印对应的字符
 %p : 与%c类似 数值对
 %p : 地址
-
+%b : 2进制表示
+%o : 8进制表示
+%x : 16进制表示，字母形式为小写 a-f
+%X : 16进制表示，字母形式为大写 A-F
 
 
 
