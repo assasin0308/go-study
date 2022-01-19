@@ -8,6 +8,43 @@
 // go env -w GO111MODULE=on
 // go get -v golang.org/x/tools/cmd/goimports
 
+// 常用插件
+
+git clone https://github.com/golang/tools.git tools
+git clone https://github.com/golang/lint lint
+git clone https://github.com/golang/image image
+git clone https://github.com/golang/protobuf protobuf
+git clone https://github.com/golang/sys sys
+
+
+go get github.com/ramya-rao-a/go-outline
+go get github.com/acroca/go-symbols
+go get golang.org/x/tools/cmd/guru
+go get golang.org/x/tools/cmd/gorename
+go get golang.org/x/image/font
+go get github.com/golang/freetype
+go get github.com/josharian/impl
+go get github.com/rogpeppe/godef
+go get github.com/sqs/goreturns
+go get github.com/cweill/gotests/gotests
+go get github.com/lukehoban/go-find-references
+go get github.com/disintegration/imaging
+go get github.com/mojocn/base64Captcha
+
+go get github.com/skip2/go-qrcode
+go get github.com/bitly/go-simplejson
+go get gopkg.in/yaml.v2
+go get github.com/go-sql-driver/mysql
+go get github.com/go-xorm/xorm
+go get github.com/aliyun/aliyun-oss-go-sdk/oss
+go get github.com/go-redis/redis
+go get github.com/gin-gonic/gin
+go get github.com/fvbock/endless
+go get github.com/mozillazg/go-slugify
+go get github.com/astaxie/beego
+go get github.com/beego/bee
+go get github.com/gorilla/websocket
+
 
 go mod init gin
 go mod edit -require github.com/gin-gonic/gin@latest
