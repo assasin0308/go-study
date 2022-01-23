@@ -1412,7 +1412,7 @@ func testShape(s Shape) {
 	fmt.Println("周长:",s.peri(),"面积:",s.area())
 }
 
-// 转型1
+// 对象转型方法一
 func getType(s Shape) {
 	// 获取类型: instance,ok := 接口对象.(实际类型)
 	// 如果该接口对象是对应的实际类型,那么instance就是转型之后的对象,OK是true
@@ -1425,7 +1425,7 @@ func getType(s Shape) {
 	}
 }
 
-// 转型2
+// 对象转型方法二
 func getType2(s Shape) {
 	// 结合switch语句  接口对象.(type)
 	switch ins := s.(type) {
